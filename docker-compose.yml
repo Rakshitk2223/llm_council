@@ -1,0 +1,93 @@
+# =============================================================================
+# AXIS COUNCIL - DOCKER COMPOSE CONFIGURATION
+# =============================================================================
+# Run with: docker-compose up --build
+# Stop with: docker-compose down
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # BACKEND SERVICE
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: axis-council-backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Azure OpenAI Configuration
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION:-2024-02-15-preview}
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      # Rate Limiting
+      - RATE_LIMIT_PER_DAY=${RATE_LIMIT_PER_DAY:-20}
+      # CORS
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - axis-network
+
+  # ---------------------------------------------------------------------------
+  # FRONTEND SERVICE
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: axis-council-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - axis-network
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  axis-network:
+    driver: bridge
+
+# =============================================================================
+# USAGE NOTES
+# =============================================================================
+#
+# 1. First time setup:
+#    - Copy .env.example to .env
+#    - Fill in your Azure OpenAI credentials
+#    - Fill in your JWT secret
+#
+# 2. Build and run:
+#    docker-compose up --build
+#
+# 3. Access:
+#    - Frontend: http://localhost:5173
+#    - Backend API: http://localhost:8000
+#    - Health check: http://localhost:8000/api/health
+#
+# 4. View logs:
+#    docker-compose logs -f
+#
+# 5. Stop:
+#    docker-compose down
+#
+# 6. Rebuild after code changes:
+#    docker-compose up --build
+#
+# =============================================================================
