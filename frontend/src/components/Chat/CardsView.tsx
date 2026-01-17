@@ -81,83 +81,82 @@ export function CardsView({ messages }: CardsViewProps) {
   return (
     <div className="mb-4">
       <div className="relative">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={goToPrevious}
-            disabled={currentIndex === 0}
-            className="p-2 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
-            aria-label="Previous response"
+        <div className="overflow-hidden">
+          <div 
+            className="flex transition-transform duration-300 ease-out"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+            {councilMessages.map((message, index) => {
+              const memberId = message.memberId || 'alpha';
+              const isActive = index === currentIndex;
+              const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
 
-          <div className="flex-1 overflow-hidden">
-            <div 
-              className="flex transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {councilMessages.map((message, index) => {
-                const memberId = message.memberId || 'alpha';
-                const isActive = index === currentIndex;
-                const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
-
-                return (
+              return (
+                <div
+                  key={message.id}
+                  className="group w-full flex-shrink-0 relative"
+                  style={{
+                    opacity: isActive ? 0.7 : 0.2,
+                    transition: 'opacity 0.3s ease-out',
+                  }}
+                >
                   <div
-                    key={message.id}
-                    className="group w-full flex-shrink-0"
-                    style={{
-                      opacity: isActive ? 0.7 : 0.2,
-                      transition: 'opacity 0.3s ease-out',
-                    }}
+                    className={`
+                      glass-elevated 
+                      border-l-4 ${borderColor}
+                      px-4 py-4 
+                      rounded-xl rounded-l-sm
+                      transition-all duration-300
+                    `}
                   >
-                    <div
-                      className={`
-                        glass-elevated 
-                        border-l-4 ${borderColor}
-                        px-4 py-4 
-                        rounded-xl rounded-l-sm
-                        transition-all duration-300
-                        max-h-[350px]
-                        overflow-y-auto
-                      `}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <RobotAvatar memberId={memberId} size="md" />
-                        <div className="flex items-center gap-2 flex-1">
-                          <span className="font-semibold text-sm">{message.memberName}</span>
-                          {message.isThinking && <ThinkingIndicator />}
-                          {message.isStreaming && (
-                            <span className="text-xs text-accent animate-pulse">streaming...</span>
-                          )}
-                        </div>
-                        {message.content && !message.isThinking && (
-                          <CopyButton content={message.content} />
+                    <div className="flex items-center gap-3 mb-3">
+                      <RobotAvatar memberId={memberId} size="md" />
+                      <div className="flex items-center gap-2 flex-1">
+                        <span className="font-semibold text-sm">{message.memberName}</span>
+                        {message.isThinking && <ThinkingIndicator />}
+                        {message.isStreaming && (
+                          <span className="text-xs text-accent animate-pulse">streaming...</span>
                         )}
                       </div>
-                      {!message.isThinking && message.content && (
-                        <div className="prose prose-sm max-w-none text-text-secondary dark:prose-invert">
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
-                        </div>
+                      {message.content && !message.isThinking && (
+                        <CopyButton content={message.content} />
                       )}
                     </div>
+                    {!message.isThinking && message.content && (
+                      <div className="prose prose-sm max-w-none text-text-secondary dark:prose-invert">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
-          <button
-            onClick={goToNext}
-            disabled={currentIndex === councilMessages.length - 1}
-            className="p-2 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
-            aria-label="Next response"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+                  {isActive && (
+                    <>
+                      <button
+                        onClick={goToPrevious}
+                        disabled={currentIndex === 0}
+                        className="absolute top-2 right-12 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
+                        aria-label="Previous response"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={goToNext}
+                        disabled={currentIndex === councilMessages.length - 1}
+                        className="absolute top-2 right-4 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
+                        aria-label="Next response"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex justify-center gap-2 mt-3">

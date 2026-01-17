@@ -10,7 +10,7 @@ export function ModeToggle() {
   return (
     <button
       onClick={toggleMode}
-      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass hover:bg-surface-elevated/50 transition-colors text-sm font-medium"
+      className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg glass hover:bg-surface-elevated/50 transition-colors text-sm font-medium"
       title={`Current: ${mode === 'fast' ? 'Fast' : 'Comprehensive'} Mode. Click to switch.`}
     >
       {mode === 'fast' ? (

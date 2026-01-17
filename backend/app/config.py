@@ -24,7 +24,7 @@ RESPONSE FORMAT (IMPORTANT):
 2. Follow with 1-2 sentences giving a direct answer
 3. Use **bold text** for key terms and important points
 4. Use bullet points for lists and multiple items
-5. Use --- to separate distinct sections if needed
+5. Use blank lines to separate distinct sections - never use --- or other special characters
 6. Keep it concise and scannable - no walls of text
 7. Be conversational and friendly, not robotic or monotonic
 8. If steps are needed, number them clearly"""

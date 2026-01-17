@@ -10,7 +10,7 @@ export function LayoutToggle() {
   return (
     <button
       onClick={toggleLayout}
-      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass hover:bg-surface-elevated/50 transition-colors text-sm font-medium"
+      className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg glass hover:bg-surface-elevated/50 transition-colors text-sm font-medium"
       title={`Switch to ${layoutMode === 'sequential' ? 'Cards' : 'Sequential'} view`}
     >
       {layoutMode === 'sequential' ? (

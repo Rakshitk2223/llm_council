@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Session } from '../../types';
 import { useSessionStore } from '../../stores/sessionStore';
@@ -14,6 +14,7 @@ export function SessionItem({ session, isActive, onSelect }: SessionItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [editTitle, setEditTitle] = useState(session.title);
   const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { renameSession, deleteSession } = useSessionStore();
 
   useEffect(() => {
@@ -22,6 +23,19 @@ export function SessionItem({ session, isActive, onSelect }: SessionItemProps) {
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (!showMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   const handleRename = () => {
     if (editTitle.trim()) {
@@ -78,6 +92,7 @@ export function SessionItem({ session, isActive, onSelect }: SessionItemProps) {
           </button>
           {showMenu && (
             <div
+              ref={menuRef}
               className="absolute right-0 top-full mt-1 bg-surface-elevated border border-border rounded-md shadow-md py-1 z-10"
               onClick={(event) => event.stopPropagation()}
             >
