@@ -9,16 +9,10 @@ interface CardsViewProps {
   messages: Message[];
 }
 
-const memberGlowClasses: Record<string, string> = {
-  alpha: 'glow-alpha',
-  beta: 'glow-beta',
-  gamma: 'glow-gamma',
-};
-
 const memberBorderColors: Record<string, string> = {
-  alpha: 'border-alpha',
-  beta: 'border-beta',
-  gamma: 'border-gamma',
+  alpha: 'border-l-alpha',
+  beta: 'border-l-beta',
+  gamma: 'border-l-gamma',
 };
 
 export function CardsView({ messages }: CardsViewProps) {
@@ -56,16 +50,16 @@ export function CardsView({ messages }: CardsViewProps) {
   }
 
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <div className="relative">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
-            className="p-2 glass-elevated rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated transition-all"
+            className="p-2 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
             aria-label="Previous response"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -78,28 +72,25 @@ export function CardsView({ messages }: CardsViewProps) {
               {councilMessages.map((message, index) => {
                 const memberId = message.memberId || 'alpha';
                 const isActive = index === currentIndex;
-                const glowClass = memberGlowClasses[memberId] || '';
-                const borderColor = memberBorderColors[memberId] || 'border-gray-400';
+                const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
 
                 return (
                   <div
                     key={message.id}
-                    className="w-full flex-shrink-0 px-2"
+                    className="w-full flex-shrink-0"
                     style={{
-                      opacity: isActive ? 1 : 0.3,
+                      opacity: isActive ? 0.7 : 0.2,
                       transition: 'opacity 0.3s ease-out',
                     }}
                   >
                     <div
                       className={`
                         glass-elevated 
-                        border-2 ${borderColor}
-                        ${isActive ? glowClass : ''}
-                        p-4 
-                        rounded-xl
+                        border-l-4 ${borderColor}
+                        px-4 py-4 
+                        rounded-xl rounded-l-sm
                         transition-all duration-300
-                        min-h-[200px]
-                        max-h-[400px]
+                        max-h-[350px]
                         overflow-y-auto
                       `}
                     >
@@ -128,16 +119,16 @@ export function CardsView({ messages }: CardsViewProps) {
           <button
             onClick={goToNext}
             disabled={currentIndex === councilMessages.length - 1}
-            className="p-2 glass-elevated rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated transition-all"
+            className="p-2 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
             aria-label="Next response"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-3">
           {councilMessages.map((message, index) => {
             const memberId = message.memberId || 'alpha';
             const isActive = index === currentIndex;
@@ -146,10 +137,10 @@ export function CardsView({ messages }: CardsViewProps) {
                 key={message.id}
                 onClick={() => setCurrentIndex(index)}
                 className={`
-                  w-2 h-2 rounded-full transition-all duration-300
+                  h-1.5 rounded-full transition-all duration-300
                   ${isActive 
                     ? `w-6 bg-${memberId}` 
-                    : 'bg-border hover:bg-text-muted'
+                    : 'w-1.5 bg-border hover:bg-text-muted'
                   }
                 `}
                 aria-label={`Go to ${message.memberName}'s response`}

@@ -10,120 +10,89 @@ interface VotingDisplayProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 8) return 'bg-green-500';
-  if (score >= 6) return 'bg-yellow-500';
-  return 'bg-red-500';
-}
-
-function getScoreTextColor(score: number): string {
   if (score >= 8) return 'text-green-400';
   if (score >= 6) return 'text-yellow-400';
   return 'text-red-400';
 }
 
+function getBarColor(score: number): string {
+  if (score >= 8) return 'bg-green-500';
+  if (score >= 6) return 'bg-yellow-500';
+  return 'bg-red-500';
+}
+
 export function VotingDisplay({ results, mapping, votes }: VotingDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  if (results.length === 0) return null;
+
   return (
-    <div className="mb-4 glass-elevated rounded-xl overflow-hidden">
-      <div
-        className="px-4 py-3 border-b border-border flex items-center justify-between cursor-pointer hover:bg-surface-elevated/50 transition-colors"
+    <div className="mb-4">
+      <div 
+        className="glass inline-flex items-center gap-3 px-4 py-2 rounded-full cursor-pointer hover:bg-surface-elevated/30 transition-all"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="font-semibold text-sm bg-gradient-to-r from-alpha via-beta to-gamma bg-clip-text text-transparent">
-          Council Ratings
-        </span>
-        <button className="text-text-muted hover:text-text text-sm flex items-center gap-1">
-          {isExpanded ? 'Hide' : 'Show'} Details
-          <svg
-            className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-      </div>
-
-      <div className="px-4 py-4 space-y-3">
-        {results.map((result, idx) => {
-          const score = result.overallAverage || 0;
-          const percentage = (score / 10) * 100;
-
-          return (
-            <div key={result.memberId} className="flex items-center gap-3">
-              <RobotAvatar memberId={result.memberId} size="sm" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium truncate">{result.memberName}</span>
-                    {idx === 0 && (
-                      <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full whitespace-nowrap">
-                        Top Rated
-                      </span>
-                    )}
-                  </div>
-                  <span className={`text-sm font-bold ${getScoreTextColor(score)}`}>
-                    {score.toFixed(1)}
-                  </span>
-                </div>
-                <div className="h-2 bg-surface-elevated rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${getScoreColor(score)} transition-all duration-500`}
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
+        <span className="text-xs text-text-muted">Ratings:</span>
+        <div className="flex items-center gap-4">
+          {results.map((result, idx) => (
+            <div key={result.memberId} className="flex items-center gap-1.5">
+              <RobotAvatar memberId={result.memberId} size="xs" />
+              <span className={`text-xs font-semibold ${getScoreColor(result.overallAverage || 0)}`}>
+                {(result.overallAverage || 0).toFixed(1)}
+              </span>
+              {idx === 0 && (
+                <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">
+                  top
+                </span>
+              )}
             </div>
-          );
-        })}
+          ))}
+        </div>
+        <svg
+          className={`w-3 h-3 text-text-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
 
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border pt-4">
-          <div className="text-xs text-text-muted mb-3">Detailed Breakdown</div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-text-muted">
-                <th className="py-2 text-left font-medium">Response</th>
-                <th className="py-2 text-center font-medium">Accuracy</th>
-                <th className="py-2 text-center font-medium">Relevance</th>
-                <th className="py-2 text-center font-medium">Clarity</th>
-                <th className="py-2 text-center font-medium">Complete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((result) => {
-                const scores = result.averageScores || {
-                  accuracy: 0,
-                  relevance: 0,
-                  clarity: 0,
-                  completeness: 0,
-                };
-                return (
-                  <tr key={result.memberId} className="border-b border-border/50 last:border-0">
-                    <td className="py-2 flex items-center gap-2">
-                      <RobotAvatar memberId={result.memberId} size="xs" />
-                      <span className="text-sm">{result.memberName}</span>
-                    </td>
-                    <td className={`py-2 text-center ${getScoreTextColor(scores.accuracy || 0)}`}>
-                      {(scores.accuracy || 0).toFixed(1)}
-                    </td>
-                    <td className={`py-2 text-center ${getScoreTextColor(scores.relevance || 0)}`}>
-                      {(scores.relevance || 0).toFixed(1)}
-                    </td>
-                    <td className={`py-2 text-center ${getScoreTextColor(scores.clarity || 0)}`}>
-                      {(scores.clarity || 0).toFixed(1)}
-                    </td>
-                    <td className={`py-2 text-center ${getScoreTextColor(scores.completeness || 0)}`}>
-                      {(scores.completeness || 0).toFixed(1)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="mt-2 glass-elevated rounded-xl p-4 animate-fade-in">
+          <div className="space-y-2">
+            {results.map((result) => {
+              const score = result.overallAverage || 0;
+              const percentage = (score / 10) * 100;
+              const scores = result.averageScores || {};
+
+              return (
+                <div key={result.memberId} className="flex items-center gap-3">
+                  <RobotAvatar memberId={result.memberId} size="sm" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium">{result.memberName}</span>
+                      <span className={`text-xs font-bold ${getScoreColor(score)}`}>
+                        {score.toFixed(1)}
+                      </span>
+                    </div>
+                    <div className="h-1 bg-surface rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${getBarColor(score)} transition-all duration-500`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <div className="flex gap-3 mt-1 text-[10px] text-text-muted">
+                      <span>Acc: {(scores.accuracy || 0).toFixed(1)}</span>
+                      <span>Rel: {(scores.relevance || 0).toFixed(1)}</span>
+                      <span>Clr: {(scores.clarity || 0).toFixed(1)}</span>
+                      <span>Cmp: {(scores.completeness || 0).toFixed(1)}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
