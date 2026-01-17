@@ -27,7 +27,7 @@ export function Sidebar() {
           </p>
         )}
       </div>
-      <div className="p-3 md:p-4 border-t border-border flex gap-2">
+      <div className="p-3 md:p-4 flex gap-2">
         <ModeToggle />
         <LayoutToggle />
       </div>

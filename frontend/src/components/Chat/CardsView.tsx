@@ -134,7 +134,7 @@ export function CardsView({ messages }: CardsViewProps) {
                       <button
                         onClick={goToPrevious}
                         disabled={currentIndex === 0}
-                        className="absolute top-2 right-12 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
+                        className="absolute top-3 right-20 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
                         aria-label="Previous response"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@ export function CardsView({ messages }: CardsViewProps) {
                       <button
                         onClick={goToNext}
                         disabled={currentIndex === councilMessages.length - 1}
-                        className="absolute top-2 right-4 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
+                        className="absolute top-3 right-12 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
                         aria-label="Next response"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
