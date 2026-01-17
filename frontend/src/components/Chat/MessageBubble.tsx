@@ -1,8 +1,38 @@
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { Message } from '../../types';
 import { RobotAvatar } from './RobotAvatar';
 import { ThinkingIndicator } from './ThinkingIndicator';
+
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-white/10 text-text-secondary hover:text-text-primary"
+      title={copied ? 'Copied!' : 'Copy to clipboard'}
+    >
+      {copied ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
 interface MessageBubbleProps {
   message: Message;
@@ -52,7 +82,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
 
   return (
-    <div className={`mb-4 ${isSenator ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}>
+    <div className={`group mb-4 ${isSenator ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}>
       <div 
         className={`
           glass-elevated 
@@ -65,7 +95,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       >
         <div className="flex items-center gap-3 mb-3">
           <RobotAvatar memberId={memberId} size={isSenator ? 'lg' : 'md'} />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <span className={`font-semibold ${isSenator ? 'text-base' : 'text-sm'}`}>
               {message.memberName}
             </span>
@@ -79,6 +109,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               <span className="text-xs text-accent animate-pulse">streaming...</span>
             )}
           </div>
+          {message.content && !message.isThinking && (
+            <CopyButton content={message.content} />
+          )}
         </div>
         {!message.isThinking && message.content && (
           <div className={`prose prose-sm max-w-none dark:prose-invert ${isSenator ? 'text-text-primary' : 'text-text-secondary'}`}>
