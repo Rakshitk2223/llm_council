@@ -1,6 +1,6 @@
-import React from 'react';
-
 import { useSessionStore } from '../../stores/sessionStore';
+import { LayoutToggle } from '../Layout/LayoutToggle';
+import { ModeToggle } from '../Mode/ModeToggle';
 import { NewSessionButton } from './NewSessionButton';
 import { SessionItem } from './SessionItem';
 
@@ -26,6 +26,10 @@ export function Sidebar() {
             No sessions yet. Start a new one!
           </p>
         )}
+      </div>
+      <div className="p-3 border-t border-border flex gap-2">
+        <ModeToggle />
+        <LayoutToggle />
       </div>
     </div>
   );

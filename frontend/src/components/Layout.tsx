@@ -3,10 +3,8 @@ import { useModeStore } from '../stores/modeStore';
 import { ChatArea } from './Chat/ChatArea';
 import { InputArea } from './Input/InputArea';
 import { LayoutSelector } from './Layout/LayoutSelector';
-import { LayoutToggle } from './Layout/LayoutToggle';
 import { MobileHeader } from './Layout/MobileHeader';
 import { ModeSelector } from './Mode/ModeSelector';
-import { ModeToggle } from './Mode/ModeToggle';
 import { Sidebar } from './Sidebar/Sidebar';
 import { ThemeToggle } from './Theme/ThemeToggle';
 
@@ -71,9 +69,6 @@ export function Layout() {
           </div>
         </main>
       </div>
-
-      <ModeToggle />
-      <LayoutToggle />
     </>
   );
 }

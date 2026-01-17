@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useModeStore } from '../../stores/modeStore';
 
 export function ModeToggle() {
@@ -12,7 +10,7 @@ export function ModeToggle() {
   return (
     <button
       onClick={toggleMode}
-      className="fixed bottom-4 left-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 shadow-lg border border-gray-200 dark:border-gray-700 z-40"
+      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg glass hover:bg-surface-elevated/50 transition-colors text-sm font-medium"
       title={`Current: ${mode === 'fast' ? 'Fast' : 'Comprehensive'} Mode. Click to switch.`}
     >
       {mode === 'fast' ? (
