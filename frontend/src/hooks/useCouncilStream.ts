@@ -7,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export function useCouncilStream() {
   const abortControllerRef = useRef<AbortController | null>(null);
-  const currentMessageIdRef = useRef<string | null>(null);
+  const memberMessageIds = useRef<Map<string, string>>(new Map());
 
   const {
     addMessage,
@@ -37,6 +37,7 @@ export function useCouncilStream() {
     }
 
     abortControllerRef.current = new AbortController();
+    memberMessageIds.current.clear();
     resetCouncilState();
     addMessage({ role: 'user', content: query });
 
@@ -123,24 +124,27 @@ export function useCouncilStream() {
           memberId: event.data.member_id,
           isThinking: true,
         });
-        currentMessageIdRef.current = thinkingId;
+        memberMessageIds.current.set(event.data.member_id, thinkingId);
         break;
       }
-      case 'answer_chunk':
-        if (currentMessageIdRef.current) {
-          updateMessage(currentMessageIdRef.current, { isThinking: false, isStreaming: true });
-          appendToMessage(currentMessageIdRef.current, event.data.chunk);
+      case 'answer_chunk': {
+        const messageId = memberMessageIds.current.get(event.data.member_id);
+        if (messageId) {
+          updateMessage(messageId, { isThinking: false, isStreaming: true });
+          appendToMessage(messageId, event.data.chunk);
         }
         break;
-      case 'answer_complete':
-        if (currentMessageIdRef.current) {
-          updateMessage(currentMessageIdRef.current, {
+      }
+      case 'answer_complete': {
+        const messageId = memberMessageIds.current.get(event.data.member_id);
+        if (messageId) {
+          updateMessage(messageId, {
             isStreaming: false,
             content: event.data.full_answer,
           });
-          currentMessageIdRef.current = null;
         }
         break;
+      }
       case 'voting_start':
         setCouncilPhase('voting');
         addMessage({ role: 'system', content: 'Council members are evaluating responses...' });
@@ -171,25 +175,28 @@ export function useCouncilStream() {
           memberId: 'senator',
           isThinking: true,
         });
-        currentMessageIdRef.current = verdictId;
+        memberMessageIds.current.set('senator', verdictId);
         break;
       }
-      case 'verdict_chunk':
-        if (currentMessageIdRef.current) {
-          updateMessage(currentMessageIdRef.current, { isThinking: false, isStreaming: true });
-          appendToMessage(currentMessageIdRef.current, event.data.chunk);
+      case 'verdict_chunk': {
+        const messageId = memberMessageIds.current.get('senator');
+        if (messageId) {
+          updateMessage(messageId, { isThinking: false, isStreaming: true });
+          appendToMessage(messageId, event.data.chunk);
         }
         break;
-      case 'verdict_complete':
-        if (currentMessageIdRef.current) {
-          updateMessage(currentMessageIdRef.current, {
+      }
+      case 'verdict_complete': {
+        const messageId = memberMessageIds.current.get('senator');
+        if (messageId) {
+          updateMessage(messageId, {
             isStreaming: false,
             content: event.data.verdict,
           });
-          currentMessageIdRef.current = null;
         }
         setCouncilPhase('complete');
         break;
+      }
       case 'council_complete':
         setCouncilPhase('complete');
         if (event.data.queries_remaining !== undefined) {

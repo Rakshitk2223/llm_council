@@ -25,12 +25,14 @@ export function VotingDisplay({ results, mapping, votes }: VotingDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="mb-4 bg-surface border border-border rounded-lg overflow-hidden">
+    <div className="mb-4 glass-elevated rounded-xl overflow-hidden">
       <div
-        className="px-4 py-3 border-b border-border bg-surface-elevated flex items-center justify-between cursor-pointer hover:bg-surface-elevated/80 transition-colors"
+        className="px-4 py-3 border-b border-border flex items-center justify-between cursor-pointer hover:bg-surface-elevated/50 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <span className="font-semibold text-sm">Council Ratings</span>
+        <span className="font-semibold text-sm bg-gradient-to-r from-alpha via-beta to-gamma bg-clip-text text-transparent">
+          Council Ratings
+        </span>
         <button className="text-text-muted hover:text-text text-sm flex items-center gap-1">
           {isExpanded ? 'Hide' : 'Show'} Details
           <svg

@@ -228,11 +228,9 @@ Council Responses (ranked by score):
 
 {response_details}
 
----
-
 Analyze the responses and give YOUR final answer. Match the format to what was asked.""".format(
             query=query,
-            response_details="---".join(response_details),
+            response_details="\n\n".join(response_details),
         )
 
     def _format_senator_context_fast(
@@ -261,9 +259,7 @@ Council Responses:
 
 {response_details}
 
----
-
 Analyze the responses and give YOUR final answer. Match the format to what was asked.""".format(
             query=query,
-            response_details="---".join(response_details),
+            response_details="\n\n".join(response_details),
         )
