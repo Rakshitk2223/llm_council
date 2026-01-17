@@ -120,3 +120,36 @@ body {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+  }
+  
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+  }
+  
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+  }
+  
+  .mobile-sidebar.open {
+    transform: translateX(0);
+  }
+}

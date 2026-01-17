@@ -52,7 +52,7 @@ export function InputArea() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-3 md:p-4">
       <div className="flex gap-3 items-end">
         <textarea
           ref={textareaRef}

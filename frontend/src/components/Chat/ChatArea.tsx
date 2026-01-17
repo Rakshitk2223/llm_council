@@ -32,7 +32,7 @@ export function ChatArea() {
 
   if (layoutMode === 'cards') {
     return (
-      <div className="h-full overflow-y-auto px-6 py-6" ref={containerRef}>
+      <div className="h-full overflow-y-auto px-3 py-4 md:px-6 md:py-6" ref={containerRef}>
         {councilState.error && (
           <div className="mb-4">
             <ErrorMessage message={councilState.error} />
@@ -71,7 +71,7 @@ export function ChatArea() {
   const senatorIndex = messages.findIndex((m) => m.memberId === 'senator');
 
   return (
-    <div className="h-full overflow-y-auto px-6 py-6" ref={containerRef}>
+    <div className="h-full overflow-y-auto px-3 py-4 md:px-6 md:py-6" ref={containerRef}>
       {councilState.error && (
         <div className="mb-4">
           <ErrorMessage message={councilState.error} />
