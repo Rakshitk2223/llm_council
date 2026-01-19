@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import AsyncGenerator
 
-from app.config import COUNCIL_MEMBERS, SENATOR
+from app.config import COUNCIL_MEMBERS, SENATOR, MAX_TOKENS_COUNCIL, MAX_TOKENS_SENATOR
 from app.services.llm_service import LLMService
 from app.services.voting import VotingService
 
@@ -56,6 +56,7 @@ class CouncilService:
                 system_prompt=member["persona"],
                 messages=messages,
                 temperature=member["temperature"],
+                max_tokens=MAX_TOKENS_COUNCIL,
             ):
                 full_response += chunk
                 yield {
@@ -152,6 +153,7 @@ class CouncilService:
                 system_prompt=SENATOR["persona"],
                 messages=[{"role": "user", "content": senator_context}],
                 temperature=SENATOR["temperature"],
+                max_tokens=MAX_TOKENS_SENATOR,
             ):
                 full_verdict += chunk
                 yield {"event": "verdict_chunk", "data": {"chunk": chunk}}
@@ -209,7 +211,7 @@ class CouncilService:
 {member_name}'s Response {rank_note}:
 "{response_text}"
 
-Scores: Accuracy: {accuracy:.1f} | Relevance: {relevance:.1f} | Clarity: {clarity:.1f} | Completeness: {completeness:.1f}
+Scores: Accuracy: {accuracy:.1f} | Relevance: {relevance:.1f} | Clarity: {clarity:.1f} | Completeness: {completeness:.1f} | Confidence: {factual_confidence:.1f}
 Overall: {overall:.1f}/10
 """.format(
                     member_name=member_name,
@@ -219,6 +221,7 @@ Overall: {overall:.1f}/10
                     relevance=scores.get("relevance", 0),
                     clarity=scores.get("clarity", 0),
                     completeness=scores.get("completeness", 0),
+                    factual_confidence=scores.get("factual_confidence", 0),
                     overall=overall,
                 )
             )

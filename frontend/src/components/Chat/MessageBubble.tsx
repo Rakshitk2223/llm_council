@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { Message } from '../../types';
+import { getMemberColor } from '../../utils/memberConfig';
 import { RobotAvatar } from './RobotAvatar';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
@@ -37,20 +38,6 @@ function CopyButton({ content }: { content: string }) {
 interface MessageBubbleProps {
   message: Message;
 }
-
-const memberGlowClasses: Record<string, string> = {
-  alpha: 'glow-alpha',
-  beta: 'glow-beta',
-  gamma: 'glow-gamma',
-  senator: 'glow-senator',
-};
-
-const memberBorderColors: Record<string, string> = {
-  alpha: 'border-l-alpha',
-  beta: 'border-l-beta',
-  gamma: 'border-l-gamma',
-  senator: 'border-l-senator',
-};
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user';
@@ -92,20 +79,16 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   }
 
   const memberId = message.memberId || 'alpha';
-  const glowClass = isSenator ? memberGlowClasses[memberId] : '';
-  const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
+  const { color } = getMemberColor(memberId);
 
   return (
     <div className={`group mb-4 ${isSenator ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}>
       <div 
-        className={`
-          glass-elevated 
-          border-l-4 ${borderColor}
-          ${isSenator ? glowClass : ''} 
-          px-4 py-4 
-          rounded-xl rounded-l-sm
-          transition-all duration-300
-        `}
+        className="glass-elevated border-l-4 px-4 py-4 rounded-xl rounded-l-sm transition-all duration-300"
+        style={{ 
+          borderLeftColor: color,
+          boxShadow: isSenator ? `0 0 30px ${color}40` : undefined,
+        }}
       >
         <div className="flex items-center gap-3 mb-3">
           <RobotAvatar memberId={memberId} size={isSenator ? 'lg' : 'md'} />
@@ -114,7 +97,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               {message.memberName}
             </span>
             {isSenator && (
-              <span className="text-xs bg-gradient-to-r from-senator/30 to-senator/10 text-senator px-3 py-1 rounded-full border border-senator/30">
+              <span 
+                className="text-xs px-3 py-1 rounded-full border"
+                style={{ 
+                  backgroundColor: `${color}20`,
+                  color: color,
+                  borderColor: `${color}50`,
+                }}
+              >
                 Final Verdict
               </span>
             )}

@@ -95,19 +95,18 @@ class VotingService:
                 if average_scores
                 else 0
             )
-            member_name = next(
-                (
-                    member["name"]
-                    for member in COUNCIL_MEMBERS
-                    if member["id"] == member_id
-                ),
-                member_id,
+            member = next(
+                (m for m in COUNCIL_MEMBERS if m["id"] == member_id),
+                None,
             )
+            member_name = member["name"] if member else member_id
+            member_temp = member["temperature"] if member else 1.0
             results.append(
                 {
                     "response_label": label,
                     "member_id": member_id,
                     "member_name": member_name,
+                    "member_temperature": member_temp,
                     "average_scores": average_scores,
                     "overall_average": overall_average,
                     "all_ratings": {
@@ -116,7 +115,10 @@ class VotingService:
                     },
                 }
             )
-        results.sort(key=lambda result: result["overall_average"], reverse=True)
+        results.sort(
+            key=lambda r: (r["overall_average"], -r["member_temperature"]),
+            reverse=True,
+        )
         return results
 
 

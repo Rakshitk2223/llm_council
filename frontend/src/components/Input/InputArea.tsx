@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { FollowUpSuggestions } from '../Chat/FollowUpSuggestions';
 import { useCouncilStream } from '../../hooks/useCouncilStream';
 import { useModeStore } from '../../stores/modeStore';
 import { useSessionStore } from '../../stores/sessionStore';
@@ -51,8 +52,13 @@ export function InputArea() {
     }
   };
 
+  const handleFollowUpSelect = (question: string) => {
+    setQuery(question);
+  };
+
   return (
     <div className="p-3 md:p-4">
+      <FollowUpSuggestions onSelect={handleFollowUpSelect} />
       <div className="flex gap-3 items-end">
         <textarea
           ref={textareaRef}

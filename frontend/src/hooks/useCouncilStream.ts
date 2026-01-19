@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 
+import { parseFollowUpQuestions, removeFollowUpSection } from '../components/Chat/FollowUpSuggestions';
 import { useSessionStore } from '../stores/sessionStore';
 import type { CouncilMode, SSEEvent, SSEEventType } from '../types';
 
@@ -19,6 +20,7 @@ export function useCouncilStream() {
     setError,
     setQueriesRemaining,
     resetCouncilState,
+    setFollowUpQuestions,
   } = useSessionStore();
 
   const getCurrentSession = () => {
@@ -188,12 +190,17 @@ export function useCouncilStream() {
       }
       case 'verdict_complete': {
         const messageId = memberMessageIds.current.get('senator');
+        const verdict = event.data.verdict;
+        const followUpQuestions = parseFollowUpQuestions(verdict);
+        const cleanVerdict = removeFollowUpSection(verdict);
+
         if (messageId) {
           updateMessage(messageId, {
             isStreaming: false,
-            content: event.data.verdict,
+            content: cleanVerdict,
           });
         }
+        setFollowUpQuestions(followUpQuestions);
         setCouncilPhase('complete');
         break;
       }

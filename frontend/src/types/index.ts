@@ -26,6 +26,7 @@ export interface VotingResult {
     relevance: number;
     clarity: number;
     completeness: number;
+    factual_confidence?: number;
   };
   overallAverage: number;
 }
@@ -40,6 +41,7 @@ export interface CouncilState {
   votingVotes?: Record<string, Record<string, Record<string, number>>>;
   error?: string;
   queriesRemaining?: number;
+  followUpQuestions?: string[];
 }
 
 export type SSEEventType =

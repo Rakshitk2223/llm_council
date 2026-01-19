@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { Message } from '../../types';
+import { getMemberColor } from '../../utils/memberConfig';
 import { RobotAvatar } from './RobotAvatar';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
@@ -37,12 +38,6 @@ function CopyButton({ content }: { content: string }) {
 interface CardsViewProps {
   messages: Message[];
 }
-
-const memberBorderColors: Record<string, string> = {
-  alpha: 'border-l-alpha',
-  beta: 'border-l-beta',
-  gamma: 'border-l-gamma',
-};
 
 export function CardsView({ messages }: CardsViewProps) {
   const councilMessages = messages.filter(
@@ -89,7 +84,7 @@ export function CardsView({ messages }: CardsViewProps) {
             {councilMessages.map((message, index) => {
               const memberId = message.memberId || 'alpha';
               const isActive = index === currentIndex;
-              const borderColor = memberBorderColors[memberId] || 'border-l-gray-400';
+              const { color } = getMemberColor(memberId);
 
               return (
                 <div
@@ -101,13 +96,8 @@ export function CardsView({ messages }: CardsViewProps) {
                   }}
                 >
                   <div
-                    className={`
-                      glass-elevated 
-                      border-l-4 ${borderColor}
-                      px-4 py-4 
-                      rounded-xl rounded-l-sm
-                      transition-all duration-300
-                    `}
+                    className="glass-elevated border-l-4 px-4 py-4 rounded-xl rounded-l-sm transition-all duration-300"
+                    style={{ borderLeftColor: color }}
                   >
                     <div className="flex items-center gap-3 mb-3">
                       <RobotAvatar memberId={memberId} size="md" />

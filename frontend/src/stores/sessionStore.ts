@@ -20,6 +20,7 @@ interface SessionStore {
     mapping: Record<string, string>,
     votes?: Record<string, Record<string, Record<string, number>>>
   ) => void;
+  setFollowUpQuestions: (questions: string[] | undefined) => void;
   setError: (error: string | undefined) => void;
   setQueriesRemaining: (count: number) => void;
   resetCouncilState: () => void;
@@ -39,6 +40,7 @@ const initialCouncilState: CouncilState = {
   votingVotes: undefined,
   error: undefined,
   queriesRemaining: undefined,
+  followUpQuestions: undefined,
 };
 
 export const useSessionStore = create<SessionStore>((set, get) => ({
@@ -179,6 +181,11 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   setQueriesRemaining: (count) => {
     set((state) => ({
       councilState: { ...state.councilState, queriesRemaining: count },
+    }));
+  },
+  setFollowUpQuestions: (questions) => {
+    set((state) => ({
+      councilState: { ...state.councilState, followUpQuestions: questions },
     }));
   },
   resetCouncilState: () => {
