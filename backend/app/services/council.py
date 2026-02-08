@@ -1,11 +1,25 @@
 from __future__ import annotations
 
 import logging
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
-from app.config import COUNCIL_MEMBERS, SENATOR, MAX_TOKENS_COUNCIL, MAX_TOKENS_SENATOR
-from app.services.llm_service import LLMService
+from app.config import (
+    PERSONAS,
+    NEUTRAL_SENATOR,
+    GREEK_LETTERS,
+    CUSTOM_PERSONA_WRAPPER,
+    SENATOR_PERSONA_WRAPPER,
+    DEFAULT_COUNCIL,
+    DEFAULT_SENATOR,
+    DEFAULT_MODEL,
+    MAX_TOKENS_COUNCIL,
+    MAX_TOKENS_SENATOR,
+    RESPONSE_FORMAT_INSTRUCTIONS,
+)
+from app.models.schemas import CouncilConfig
+from app.services.llm_service import LLMService, TokenTracker
 from app.services.voting import VotingService
+from app.services.query_classifier import classify_query
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("council")
@@ -15,6 +29,132 @@ class CouncilService:
     def __init__(self) -> None:
         self.llm = LLMService()
         self.voting = VotingService(self.llm)
+
+    def _get_persona(self, persona_id: str) -> Optional[dict]:
+        for p in PERSONAS:
+            if p["id"] == persona_id:
+                return p
+        if persona_id == "neutral":
+            return NEUTRAL_SENATOR
+        return None
+
+    def _build_member(
+        self,
+        persona_id: str,
+        index: int,
+        model_id: str = DEFAULT_MODEL,
+        custom_persona: Optional[dict] = None,
+    ) -> dict:
+        greek = (
+            GREEK_LETTERS[index] if index < len(GREEK_LETTERS) else f"Member{index + 1}"
+        )
+
+        if persona_id == "custom" and custom_persona:
+            return {
+                "id": f"custom_{index}",
+                "name": f"Axis {greek} - {custom_persona['name']}",
+                "model": custom_persona.get("model_id") or model_id,
+                "temperature": custom_persona.get("temperature", 0.5),
+                "persona": CUSTOM_PERSONA_WRAPPER.format(
+                    custom_name=custom_persona["name"],
+                    custom_description=custom_persona["description"],
+                    RESPONSE_FORMAT_INSTRUCTIONS=RESPONSE_FORMAT_INSTRUCTIONS,
+                ),
+            }
+
+        persona = self._get_persona(persona_id)
+        if not persona:
+            persona = PERSONAS[0]
+
+        return {
+            "id": persona["id"],
+            "name": f"Axis {greek} - {persona['name']}",
+            "model": model_id,
+            "temperature": persona["temperature"],
+            "persona": persona["persona"],
+        }
+
+    def _build_senator(
+        self,
+        persona_id: str,
+        model_id: str = DEFAULT_MODEL,
+        custom_persona: Optional[dict] = None,
+    ) -> dict:
+        if persona_id == "custom" and custom_persona:
+            base_persona = CUSTOM_PERSONA_WRAPPER.format(
+                custom_name=custom_persona["name"],
+                custom_description=custom_persona["description"],
+                RESPONSE_FORMAT_INSTRUCTIONS=RESPONSE_FORMAT_INSTRUCTIONS,
+            )
+            return {
+                "id": "senator",
+                "name": f"Senator - {custom_persona['name']}",
+                "model": custom_persona.get("model_id") or model_id,
+                "temperature": custom_persona.get("temperature", 0.5),
+                "persona": SENATOR_PERSONA_WRAPPER.format(
+                    persona_name=custom_persona["name"],
+                    persona_base=base_persona,
+                ),
+            }
+
+        if persona_id == "neutral":
+            return {
+                "id": "senator",
+                "name": f"Senator - {NEUTRAL_SENATOR['name']}",
+                "model": model_id,
+                "temperature": NEUTRAL_SENATOR["temperature"],
+                "persona": NEUTRAL_SENATOR["persona"],
+            }
+
+        persona = self._get_persona(persona_id)
+        if not persona:
+            persona = NEUTRAL_SENATOR
+
+        return {
+            "id": "senator",
+            "name": f"Senator - {persona['name']}",
+            "model": model_id,
+            "temperature": persona["temperature"],
+            "persona": SENATOR_PERSONA_WRAPPER.format(
+                persona_name=persona["name"],
+                persona_base=persona["persona"],
+            ),
+        }
+
+    def _build_council(
+        self, council_config: Optional[CouncilConfig] = None
+    ) -> tuple[list[dict], dict]:
+        if council_config:
+            custom_persona_dict = None
+            if council_config.custom_persona:
+                custom_persona_dict = {
+                    "name": council_config.custom_persona.name,
+                    "description": council_config.custom_persona.description,
+                    "temperature": council_config.custom_persona.temperature,
+                    "model_id": council_config.custom_persona.model_id,
+                }
+
+            council_members = [
+                self._build_member(
+                    member.persona_id,
+                    idx,
+                    member.model_id,
+                    custom_persona_dict,
+                )
+                for idx, member in enumerate(council_config.council_members)
+            ]
+            senator = self._build_senator(
+                council_config.senator_persona,
+                council_config.senator_model,
+                custom_persona_dict,
+            )
+        else:
+            council_members = [
+                self._build_member(pid, idx) for idx, pid in enumerate(DEFAULT_COUNCIL)
+            ]
+            senator = self._build_senator(DEFAULT_SENATOR)
+
+        return council_members, senator
 
     def compact_history(self, history: list[dict]) -> list[dict]:
         compacted = []
@@ -33,9 +173,20 @@ class CouncilService:
         query: str,
         session_history: list[dict],
         mode: str = "comprehensive",
+        council_config: Optional[CouncilConfig] = None,
     ) -> AsyncGenerator[dict, None]:
+        council_members, senator = self._build_council(council_config)
+        token_tracker = TokenTracker()
+
         logger.info(f"=== COUNCIL START === Mode: {mode}")
         logger.info(f"Query: {query[:100]}...")
+        logger.info(f"Council: {[m['name'] for m in council_members]}")
+        logger.info(f"Senator: {senator['name']}")
+
+        query_classification = classify_query(query)
+        logger.info(
+            f"[CLASSIFIER] Type: {query_classification.query_type}, Temp: {query_classification.temperature}, Emojis: {query_classification.use_emojis}"
+        )
 
         history = self.compact_history(session_history)
         messages = history + [{"role": "user", "content": query}]
@@ -43,7 +194,7 @@ class CouncilService:
         yield {"event": "council_start", "data": {"phase": "answering", "mode": mode}}
 
         responses = []
-        for member in COUNCIL_MEMBERS:
+        for member in council_members:
             logger.info(f"[{member['name']}] Starting response...")
             yield {
                 "event": "thinking",
@@ -57,6 +208,7 @@ class CouncilService:
                 messages=messages,
                 temperature=member["temperature"],
                 max_tokens=MAX_TOKENS_COUNCIL,
+                token_usage=token_tracker.council_responses,
             ):
                 full_response += chunk
                 yield {
@@ -89,7 +241,7 @@ class CouncilService:
                 {
                     "member_id": r["member_id"],
                     "member_name": next(
-                        m["name"] for m in COUNCIL_MEMBERS if m["id"] == r["member_id"]
+                        m["name"] for m in council_members if m["id"] == r["member_id"]
                     ),
                     "average_scores": {},
                     "overall_average": 0,
@@ -105,9 +257,11 @@ class CouncilService:
             votes = await self.voting.collect_votes(
                 query=query,
                 labeled_responses=labeled_responses,
-                voters=COUNCIL_MEMBERS,
+                voters=council_members,
+                mode=mode,
+                token_usage=token_tracker.voting,
             )
-            aggregated = self.voting.aggregate_scores(votes, mapping)
+            aggregated = self.voting.aggregate_scores(votes, mapping, council_members)
             logger.info(f"[VOTING] Complete. Results: {len(aggregated)} members rated")
 
             yield {
@@ -117,7 +271,7 @@ class CouncilService:
                     "mapping": {
                         label: next(
                             member["name"]
-                            for member in COUNCIL_MEMBERS
+                            for member in council_members
                             if member["id"] == member_id
                         )
                         for label, member_id in mapping.items()
@@ -129,13 +283,14 @@ class CouncilService:
         logger.info("[SENATOR] Starting verdict generation...")
         yield {
             "event": "senator_start",
-            "data": {"phase": "verdict", "member": SENATOR["name"]},
+            "data": {"phase": "verdict", "member": senator["name"]},
         }
 
         if mode == "fast":
             senator_context = self._format_senator_context_fast(
                 query=query,
                 responses=responses,
+                council_members=council_members,
             )
         else:
             senator_context = self._format_senator_context(
@@ -146,25 +301,31 @@ class CouncilService:
             )
         logger.info(f"[SENATOR] Context length: {len(senator_context)} chars")
 
+        senator_persona = senator["persona"]
+        if query_classification.use_emojis:
+            senator_persona += (
+                "\n\nUse relevant emojis to make your response fun and engaging."
+            )
+
         full_verdict = ""
         try:
             async for chunk in self.llm.generate_response_stream(
-                model=SENATOR["model"],
-                system_prompt=SENATOR["persona"],
+                model=senator["model"],
+                system_prompt=senator_persona,
                 messages=[{"role": "user", "content": senator_context}],
-                temperature=SENATOR["temperature"],
+                temperature=query_classification.temperature,
                 max_tokens=MAX_TOKENS_SENATOR,
+                token_usage=token_tracker.senator,
             ):
                 full_verdict += chunk
                 yield {"event": "verdict_chunk", "data": {"chunk": chunk}}
             logger.info(f"[SENATOR] Done. Verdict length: {len(full_verdict)} chars")
         except Exception as e:
             logger.error(f"[SENATOR] Error: {str(e)}")
-            error_msg = f"Senator encountered an error: {str(e)}"
             if full_verdict:
                 yield {
                     "event": "verdict_chunk",
-                    "data": {"chunk": f"\n\n[Response interrupted]"},
+                    "data": {"chunk": "\n\n[Response interrupted]"},
                 }
             else:
                 yield {
@@ -185,6 +346,14 @@ class CouncilService:
                 else None,
             },
         }
+
+        token_summary = token_tracker.get_summary()
+        logger.info(f"=== TOKEN SUMMARY === {token_summary['total']}")
+        yield {
+            "event": "token_summary",
+            "data": token_summary,
+        }
+
         logger.info("=== COUNCIL COMPLETE ===")
 
     def _format_senator_context(
@@ -240,12 +409,13 @@ Analyze the responses and give YOUR final answer. Match the format to what was a
         self,
         query: str,
         responses: list[dict],
+        council_members: list[dict],
     ) -> str:
         response_details = []
         for response in responses:
             member_id = response["member_id"]
             member_name = next(
-                m["name"] for m in COUNCIL_MEMBERS if m["id"] == member_id
+                m["name"] for m in council_members if m["id"] == member_id
             )
             response_details.append(
                 """

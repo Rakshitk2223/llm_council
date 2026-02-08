@@ -1,4 +1,4 @@
-import { getMemberColor, getMemberIcon } from '../../utils/memberConfig';
+import { getMemberIcon } from '../../utils/memberConfig';
 
 interface RobotAvatarProps {
   memberId: string;
@@ -20,21 +20,21 @@ const iconSizes = {
 };
 
 export function RobotAvatar({ memberId, size = 'md' }: RobotAvatarProps) {
-  const { color } = getMemberColor(memberId);
   const iconPath = getMemberIcon(memberId);
   const sizeClass = sizes[size];
   const iconSize = iconSizes[size];
+  const isSenator = memberId === 'senator';
 
   return (
     <div 
-      className={`${sizeClass} rounded-full flex items-center justify-center ring-1 ring-white/10`}
-      style={{ backgroundColor: `${color}20` }}
+      className={`${sizeClass} rounded-full flex items-center justify-center ring-1 ring-border ${
+        isSenator ? 'bg-surface-elevated' : 'bg-surface'
+      }`}
     > 
       <svg 
-        className={iconSize} 
+        className={`${iconSize} text-text-primary`}
         fill="currentColor" 
         viewBox="0 0 24 24"
-        style={{ color }}
       >
         <path d={iconPath} />
       </svg>

@@ -24,8 +24,8 @@ export function InputArea() {
     }
   }, [query]);
 
-  const handleSubmit = async () => {
-    if (!query.trim() || isProcessing) {
+  const submitQuestion = async (questionText: string) => {
+    if (!questionText.trim() || isProcessing) {
       return;
     }
 
@@ -34,11 +34,13 @@ export function InputArea() {
       sessionId = createSession();
     }
 
-    const userQuery = query.trim();
     setQuery('');
-
     const authToken = localStorage.getItem('auth_token') || '';
-    await submitQuery(userQuery, authToken, mode);
+    await submitQuery(questionText.trim(), authToken, mode);
+  };
+
+  const handleSubmit = async () => {
+    await submitQuestion(query);
   };
 
   const handleCancel = () => {
@@ -53,7 +55,7 @@ export function InputArea() {
   };
 
   const handleFollowUpSelect = (question: string) => {
-    setQuery(question);
+    submitQuestion(question);
   };
 
   return (
@@ -73,7 +75,7 @@ export function InputArea() {
         {isProcessing ? (
           <button
             onClick={handleCancel}
-            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-150 font-medium"
+            className="px-6 py-3 bg-error text-white rounded-lg hover:opacity-90 transition-colors duration-150 font-medium"
           >
             Stop
           </button>

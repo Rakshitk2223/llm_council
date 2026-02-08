@@ -6,7 +6,7 @@ interface ErrorMessageProps {
 
 export function ErrorMessage({ message }: ErrorMessageProps) {
   return (
-    <div className="bg-red-50 text-red-700 border border-red-200 rounded-md px-4 py-3 text-sm">
+    <div className="bg-error/10 text-error border border-error/30 rounded-md px-4 py-3 text-sm">
       {message}
     </div>
   );

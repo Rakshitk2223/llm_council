@@ -55,8 +55,8 @@ docker-compose up --build
 5. **Access the application**
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- Health Check: http://localhost:8000/api/health
+- Backend API: http://localhost:8001
+- Health Check: http://localhost:8001/api/health
 
 ## Project Structure
 
@@ -195,7 +195,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 # Edit .env with credentials
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8001
 ```
 
 ### Frontend

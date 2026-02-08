@@ -11,7 +11,7 @@ export function LayoutSelector() {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       
-      <div className="relative glass-elevated rounded-2xl p-8 max-w-lg w-full animate-fade-in">
+      <div className="relative bg-popup border border-border rounded-2xl p-8 max-w-lg w-full animate-fade-in">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-alpha via-beta to-gamma bg-clip-text text-transparent">
             Choose Your View
@@ -24,7 +24,7 @@ export function LayoutSelector() {
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => handleSelect('sequential')}
-            className="group glass p-6 rounded-xl hover:bg-surface-elevated/50 transition-all duration-300 text-left border border-transparent hover:border-alpha/30"
+            className="group bg-surface-elevated p-6 rounded-xl hover:bg-surface-elevated/80 transition-all duration-300 text-left border border-border hover:border-alpha/30"
           >
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 mb-4 rounded-xl bg-alpha/20 flex items-center justify-center group-hover:glow-alpha transition-all">
@@ -41,7 +41,7 @@ export function LayoutSelector() {
 
           <button
             onClick={() => handleSelect('cards')}
-            className="group glass p-6 rounded-xl hover:bg-surface-elevated/50 transition-all duration-300 text-left border border-transparent hover:border-beta/30"
+            className="group bg-surface-elevated p-6 rounded-xl hover:bg-surface-elevated/80 transition-all duration-300 text-left border border-border hover:border-beta/30"
           >
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 mb-4 rounded-xl bg-beta/20 flex items-center justify-center group-hover:glow-beta transition-all">

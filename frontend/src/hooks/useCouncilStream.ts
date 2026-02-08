@@ -2,9 +2,10 @@ import { useCallback, useRef } from 'react';
 
 import { parseFollowUpQuestions, removeFollowUpSection } from '../components/Chat/FollowUpSuggestions';
 import { useSessionStore } from '../stores/sessionStore';
+import { useSettingsStore } from '../stores/settingsStore';
 import type { CouncilMode, SSEEvent, SSEEventType } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
 export function useCouncilStream() {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -22,6 +23,8 @@ export function useCouncilStream() {
     resetCouncilState,
     setFollowUpQuestions,
   } = useSessionStore();
+
+  const getCouncilConfig = useSettingsStore((state) => state.getCouncilConfig);
 
   const getCurrentSession = () => {
     const state = useSessionStore.getState();
@@ -54,6 +57,7 @@ export function useCouncilStream() {
         })) || [];
 
     try {
+      const councilConfig = getCouncilConfig();
       const response = await fetch(`${API_BASE_URL}/api/council/query`, {
         method: 'POST',
         headers: {
@@ -64,6 +68,20 @@ export function useCouncilStream() {
           query,
           session_history: sessionHistory,
           mode,
+          council_config: {
+            council_members: councilConfig.councilMembers.map(m => ({
+              persona_id: m.personaId,
+              model_id: m.modelId,
+            })),
+            senator_persona: councilConfig.senatorPersona,
+            senator_model: councilConfig.senatorModel,
+            custom_persona: councilConfig.customPersona ? {
+              name: councilConfig.customPersona.name,
+              description: councilConfig.customPersona.description,
+              temperature: councilConfig.customPersona.temperature,
+              model_id: councilConfig.customPersona.modelId,
+            } : null,
+          },
         }),
         signal: abortControllerRef.current.signal,
       });

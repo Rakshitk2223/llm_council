@@ -93,11 +93,11 @@ export function SessionItem({ session, isActive, onSelect }: SessionItemProps) {
           {showMenu && (
             <div
               ref={menuRef}
-              className="absolute right-0 top-full mt-1 bg-surface-elevated border border-border rounded-md shadow-md py-1 z-10"
+              className="absolute right-0 top-full mt-1 bg-surface-solid border border-border rounded-md shadow-lg py-1 z-10 min-w-[120px]"
               onClick={(event) => event.stopPropagation()}
             >
               <button
-                className="w-full px-4 py-2 text-left text-sm hover:bg-surface"
+                className="w-full px-4 py-2 text-left text-sm text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
                 onClick={() => {
                   setIsEditing(true);
                   setShowMenu(false);
@@ -106,7 +106,7 @@ export function SessionItem({ session, isActive, onSelect }: SessionItemProps) {
                 Rename
               </button>
               <button
-                className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-surface"
+                className="w-full px-4 py-2 text-left text-sm text-error hover:bg-surface-elevated"
                 onClick={() => {
                   deleteSession(session.id);
                   setShowMenu(false);

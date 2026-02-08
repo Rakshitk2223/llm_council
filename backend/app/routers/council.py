@@ -4,6 +4,7 @@ import traceback
 from sse_starlette.sse import EventSourceResponse
 from fastapi import APIRouter, Depends
 
+from app.config import AVAILABLE_MODELS, PERSONAS, NEUTRAL_SENATOR, SENATOR_PERSONA_IDS
 from app.middleware.auth import get_current_user
 from app.middleware.rate_limit import check_rate_limit, get_remaining_queries
 from app.models.schemas import QueryRequest
@@ -30,6 +31,7 @@ async def query_council(
                     message.model_dump() for message in request.session_history
                 ],
                 mode=request.mode,
+                council_config=request.council_config,
             ):
                 yield {
                     "event": event["event"],
@@ -56,3 +58,44 @@ async def query_council(
             }
 
     return EventSourceResponse(event_generator())
+
+
+@router.get("/config/models")
+async def get_available_models():
+    return {"models": AVAILABLE_MODELS}
+
+
+@router.get("/config/personas")
+async def get_personas():
+    all_personas = [
+        {
+            "id": p["id"],
+            "name": p["name"],
+            "description": p["description"],
+            "temperature": p["temperature"],
+        }
+        for p in PERSONAS
+    ]
+    senator_personas = [
+        {
+            "id": p["id"],
+            "name": p["name"],
+            "description": p["description"],
+            "temperature": p["temperature"],
+        }
+        for p in PERSONAS
+        if p["id"] in SENATOR_PERSONA_IDS
+    ]
+    senator_personas.insert(
+        0,
+        {
+            "id": NEUTRAL_SENATOR["id"],
+            "name": NEUTRAL_SENATOR["name"],
+            "description": NEUTRAL_SENATOR["description"],
+            "temperature": NEUTRAL_SENATOR["temperature"],
+        },
+    )
+    return {
+        "personas": all_personas,
+        "senator_personas": senator_personas,
+    }

@@ -6,8 +6,10 @@ import type { CouncilMode } from '../types';
 interface ModeStore {
   mode: CouncilMode;
   hasSelectedMode: boolean;
+  showModeSelector: boolean;
   setMode: (mode: CouncilMode) => void;
   setHasSelectedMode: (value: boolean) => void;
+  setShowModeSelector: (value: boolean) => void;
 }
 
 export const useModeStore = create<ModeStore>()(
@@ -15,11 +17,17 @@ export const useModeStore = create<ModeStore>()(
     (set) => ({
       mode: 'fast',
       hasSelectedMode: false,
+      showModeSelector: false,
       setMode: (mode) => set({ mode }),
       setHasSelectedMode: (value) => set({ hasSelectedMode: value }),
+      setShowModeSelector: (value) => set({ showModeSelector: value }),
     }),
     {
       name: 'axis-council-mode',
+      partialize: (state) => ({
+        mode: state.mode,
+        hasSelectedMode: state.hasSelectedMode,
+      }),
     }
   )
 );

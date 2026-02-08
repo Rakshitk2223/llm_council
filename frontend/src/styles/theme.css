@@ -1,33 +1,37 @@
 :root {
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: #eef2ff;
-  --color-accent: #06b6d4;
-  --color-accent-hover: #0891b2;
-  --color-background: #f8fafc;
-  --color-background-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  --color-surface: rgba(255, 255, 255, 0.8);
-  --color-surface-elevated: rgba(255, 255, 255, 0.9);
-  --color-surface-glass: rgba(255, 255, 255, 0.6);
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  --color-border: rgba(148, 163, 184, 0.3);
-  --color-border-light: rgba(148, 163, 184, 0.15);
-  --color-success: #10b981;
+  --color-primary: #4C82F7;
+  --color-primary-hover: #3A6FE0;
+  --color-primary-light: #EBF4FF;
+  --color-accent: #4C82F7;
+  --color-accent-hover: #3A6FE0;
+  --color-background: #F5F8FC;
+  --color-background-gradient: #F5F8FC;
+  --color-surface: #E8EDF5;
+  --color-surface-elevated: #E8EDF5;
+  --color-surface-glass: #E8EDF5;
+  --color-surface-solid: #EDF2F7;
+  --color-header: #4C82F7;
+  --color-popup: #E8EDF5;
+  --color-text-primary: #1A202C;
+  --color-text-secondary: #4A5568;
+  --color-text-muted: #718096;
+  --color-text-inverse: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-light: #EDF2F7;
+  --color-success: #3BB273;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-alpha: #8b5cf6;
-  --color-beta: #06b6d4;
-  --color-gamma: #f97316;
-  --color-senator: #eab308;
-  --color-glow-alpha: rgba(139, 92, 246, 0.3);
-  --color-glow-beta: rgba(6, 182, 212, 0.3);
-  --color-glow-gamma: rgba(249, 115, 22, 0.3);
-  --color-glow-senator: rgba(234, 179, 8, 0.4);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --color-alpha: #4C82F7;
+  --color-beta: #4C82F7;
+  --color-gamma: #4C82F7;
+  --color-senator: #4C82F7;
+  --color-glow-alpha: rgba(76, 130, 247, 0.2);
+  --color-glow-beta: rgba(76, 130, 247, 0.2);
+  --color-glow-gamma: rgba(76, 130, 247, 0.2);
+  --color-glow-senator: rgba(76, 130, 247, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgba(76, 130, 247, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(76, 130, 247, 0.08);
+  --shadow-glass: 0px 8px 24px rgba(76, 130, 247, 0.08);
   --backdrop-blur: blur(12px);
   --sidebar-width: 280px;
   --input-height: 80px;
@@ -38,69 +42,36 @@
   --radius-full: 9999px;
 }
 
-[data-theme="dark"] {
-  --color-primary: #818cf8;
-  --color-primary-hover: #6366f1;
-  --color-primary-light: rgba(129, 140, 248, 0.15);
-  --color-accent: #22d3ee;
-  --color-accent-hover: #06b6d4;
-  --color-background: #0a0a0f;
-  --color-background-gradient: linear-gradient(135deg, #0a0a0f 0%, #0f0a1a 50%, #0a0f1a 100%);
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-elevated: rgba(255, 255, 255, 0.06);
-  --color-surface-glass: rgba(255, 255, 255, 0.05);
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #64748b;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-border-light: rgba(255, 255, 255, 0.05);
-  --color-alpha: #a78bfa;
-  --color-beta: #22d3ee;
-  --color-gamma: #fb923c;
-  --color-senator: #facc15;
-  --color-glow-alpha: rgba(167, 139, 250, 0.25);
-  --color-glow-beta: rgba(34, 211, 238, 0.25);
-  --color-glow-gamma: rgba(251, 146, 60, 0.25);
-  --color-glow-senator: rgba(250, 204, 21, 0.3);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
 body {
-  background: var(--color-background-gradient);
+  background: var(--color-background);
   min-height: 100vh;
 }
 
 .glass {
-  background: var(--color-surface-glass);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
 }
 
 .glass-elevated {
   background: var(--color-surface-elevated);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-glass);
 }
 
 .glow-alpha {
-  box-shadow: 0 0 20px var(--color-glow-alpha), inset 0 0 20px rgba(139, 92, 246, 0.05);
+  box-shadow: 0 0 20px var(--color-glow-alpha);
 }
 
 .glow-beta {
-  box-shadow: 0 0 20px var(--color-glow-beta), inset 0 0 20px rgba(6, 182, 212, 0.05);
+  box-shadow: 0 0 20px var(--color-glow-beta);
 }
 
 .glow-gamma {
-  box-shadow: 0 0 20px var(--color-glow-gamma), inset 0 0 20px rgba(249, 115, 22, 0.05);
+  box-shadow: 0 0 20px var(--color-glow-gamma);
 }
 
 .glow-senator {
-  box-shadow: 0 0 30px var(--color-glow-senator), inset 0 0 30px rgba(234, 179, 8, 0.05);
+  box-shadow: 0 0 30px var(--color-glow-senator);
 }
 
 .gradient-border {
@@ -113,7 +84,7 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, var(--color-alpha), var(--color-beta), var(--color-gamma));
+  background: var(--color-primary);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -133,7 +104,7 @@ body {
   .mobile-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(30, 42, 74, 0.5);
     backdrop-filter: blur(4px);
     z-index: 40;
   }

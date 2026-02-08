@@ -2,7 +2,6 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { Message } from '../../types';
-import { getMemberColor } from '../../utils/memberConfig';
 import { RobotAvatar } from './RobotAvatar';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
@@ -18,7 +17,7 @@ function CopyButton({ content }: { content: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-white/10 text-text-secondary hover:text-text-primary"
+      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-surface-elevated text-text-muted hover:text-text-primary"
       title={copied ? 'Copied!' : 'Copy to clipboard'}
     >
       {copied ? (
@@ -47,7 +46,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   if (isUser) {
     return (
       <div className="flex justify-end mb-4">
-        <div className="max-w-[70%] bg-gradient-to-r from-primary to-accent text-white px-4 py-3 rounded-xl rounded-br-sm shadow-md">
+        <div className="max-w-[70%] bg-text-primary text-text-inverse px-4 py-3 rounded-xl rounded-br-sm shadow-md">
           <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
       </div>
@@ -60,7 +59,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     
     return (
       <div className="flex justify-center mb-4">
-        <div className="glass px-4 py-2 rounded-full text-text-secondary text-sm flex items-center gap-2">
+        <div className="glass px-4 py-2 rounded-full text-text-muted text-sm flex items-center gap-2">
           {isEvaluating && (
             <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -68,7 +67,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </svg>
           )}
           {isComplete && (
-            <svg className="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           )}
@@ -78,39 +77,27 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     );
   }
 
-  const memberId = message.memberId || 'alpha';
-  const { color } = getMemberColor(memberId);
-
   return (
-    <div className={`group mb-4 ${isSenator ? '' : 'opacity-70 hover:opacity-100 transition-opacity'}`}>
+    <div className={`group mb-4`}>
       <div 
-        className="glass-elevated border-l-4 px-4 py-4 rounded-xl rounded-l-sm transition-all duration-300"
-        style={{ 
-          borderLeftColor: color,
-          boxShadow: isSenator ? `0 0 30px ${color}40` : undefined,
-        }}
+        className={`glass-elevated border-l-4 border-border px-4 py-4 rounded-xl rounded-l-sm transition-colors ${
+          isSenator ? 'ring-1 ring-border' : 'hover:bg-surface-elevated/80'
+        }`}
       >
         <div className="flex items-center gap-3 mb-3">
-          <RobotAvatar memberId={memberId} size={isSenator ? 'lg' : 'md'} />
+          <RobotAvatar memberId={message.memberId || 'alpha'} size={isSenator ? 'lg' : 'md'} />
           <div className="flex items-center gap-2 flex-1">
             <span className={`font-semibold ${isSenator ? 'text-base' : 'text-sm'}`}>
               {message.memberName}
             </span>
             {isSenator && (
-              <span 
-                className="text-xs px-3 py-1 rounded-full border"
-                style={{ 
-                  backgroundColor: `${color}20`,
-                  color: color,
-                  borderColor: `${color}50`,
-                }}
-              >
+              <span className="text-xs px-3 py-1 rounded-full border border-border bg-surface-elevated text-text-muted">
                 Final Verdict
               </span>
             )}
             {message.isThinking && <ThinkingIndicator />}
             {message.isStreaming && (
-              <span className="text-xs text-accent animate-pulse">streaming...</span>
+              <span className="text-xs text-text-muted animate-pulse">streaming...</span>
             )}
           </div>
           {message.content && !message.isThinking && (
@@ -118,7 +105,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           )}
         </div>
         {!message.isThinking && message.content && (
-          <div className={`prose prose-sm max-w-none dark:prose-invert ${isSenator ? 'text-text-primary' : 'text-text-secondary'}`}>
+          <div className="prose prose-sm max-w-none dark:prose-invert text-text-primary">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         )}

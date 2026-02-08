@@ -28,19 +28,21 @@ export function FollowUpSuggestions({ onSelect }: FollowUpSuggestionsProps) {
 }
 
 export function parseFollowUpQuestions(verdict: string): string[] {
-  const marker = 'FOLLOW_UP_QUESTIONS:';
-  const markerIndex = verdict.indexOf(marker);
+  const markerPattern = /follow[_-]?up[_-]?questions?:?/i;
+  const markerMatch = verdict.match(markerPattern);
   
-  if (markerIndex === -1) {
+  if (!markerMatch) {
     return [];
   }
 
-  const questionsSection = verdict.substring(markerIndex + marker.length);
+  const markerIndex = markerMatch.index! + markerMatch[0].length;
+  const questionsSection = verdict.substring(markerIndex);
   const lines = questionsSection.split('\n').filter(line => line.trim());
   
   const questions: string[] = [];
   for (const line of lines) {
-    const match = line.match(/^\d+\.\s*(.+)/);
+    const trimmedLine = line.trim();
+    const match = trimmedLine.match(/^(?:\d+[.):]\s*|[-*]\s*)(.+)/);
     if (match) {
       const question = match[1].trim().replace(/^\[|\]$/g, '');
       if (question) {
@@ -53,12 +55,12 @@ export function parseFollowUpQuestions(verdict: string): string[] {
 }
 
 export function removeFollowUpSection(verdict: string): string {
-  const marker = 'FOLLOW_UP_QUESTIONS:';
-  const markerIndex = verdict.indexOf(marker);
+  const markerPattern = /follow[_-]?up[_-]?questions?:?/i;
+  const markerMatch = verdict.match(markerPattern);
   
-  if (markerIndex === -1) {
+  if (!markerMatch) {
     return verdict;
   }
 
-  return verdict.substring(0, markerIndex).trim();
+  return verdict.substring(0, markerMatch.index).trim();
 }

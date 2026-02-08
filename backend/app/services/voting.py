@@ -2,8 +2,8 @@ import json
 import logging
 import random
 
-from app.config import COUNCIL_MEMBERS, VOTING_PROMPT_TEMPLATE
-from app.services.llm_service import LLMService
+from app.config import VOTING_PROMPT_TEMPLATE, MAX_TOKENS_VOTING, SCORING_WEIGHTS
+from app.services.llm_service import LLMService, TokenUsage
 
 logger = logging.getLogger("council")
 
@@ -15,7 +15,16 @@ class VotingService:
     def shuffle_responses(self, responses: list[dict]) -> tuple[list[dict], dict]:
         shuffled = responses.copy()
         random.shuffle(shuffled)
-        labels = ["Response A", "Response B", "Response C", "Response D", "Response E"]
+        labels = [
+            "Response A",
+            "Response B",
+            "Response C",
+            "Response D",
+            "Response E",
+            "Response F",
+            "Response G",
+            "Response H",
+        ]
         mapping = {}
         labeled_responses = []
         for index, response in enumerate(shuffled):
@@ -35,44 +44,66 @@ class VotingService:
         query: str,
         labeled_responses: list[dict],
         voters: list[dict],
+        mode: str = "comprehensive",
+        token_usage: TokenUsage | None = None,
     ) -> dict:
         formatted_responses = self.format_responses_for_voting(labeled_responses)
         prompt = VOTING_PROMPT_TEMPLATE.format(
             query=query, responses=formatted_responses
         )
         all_votes = {}
-        for voter in voters[:1]:
+
+        if mode == "deep":
+            voters_to_use = voters
+            logger.info(f"[VOTING] Deep mode: All {len(voters)} voters will rate")
+        else:
+            voters_to_use = [random.choice(voters)]
+            logger.info(f"[VOTING] Standard mode: Using voter {voters_to_use[0]['id']}")
+
+        for voter in voters_to_use:
             logger.info(f"[VOTING] Getting vote from {voter['id']}...")
             response = await self.llm.generate_response(
                 model=voter["model"],
                 system_prompt="You are an impartial evaluator. Rate responses objectively.",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
-                max_tokens=400,
+                max_tokens=MAX_TOKENS_VOTING,
+                token_usage=token_usage,
             )
-            logger.info(f"[VOTING] Raw response: {response[:200]}...")
+            logger.info(
+                f"[VOTING] Raw response from {voter['id']}: {response[:200]}..."
+            )
             try:
                 parsed = json.loads(response)
                 all_votes[voter["id"]] = parsed["ratings"]
                 logger.info(
-                    f"[VOTING] Parsed successfully: {list(parsed['ratings'].keys())}"
+                    f"[VOTING] Parsed successfully from {voter['id']}: {list(parsed['ratings'].keys())}"
                 )
             except json.JSONDecodeError as e:
-                logger.warning(f"[VOTING] JSON parse failed: {e}")
+                logger.warning(f"[VOTING] JSON parse failed for {voter['id']}: {e}")
                 json_match = _extract_json(response)
                 if json_match:
                     try:
                         parsed = json.loads(json_match)
                         all_votes[voter["id"]] = parsed["ratings"]
-                        logger.info(f"[VOTING] Extracted JSON successfully")
+                        logger.info(
+                            f"[VOTING] Extracted JSON successfully from {voter['id']}"
+                        )
                     except Exception as e2:
-                        logger.error(f"[VOTING] Extraction also failed: {e2}")
+                        logger.error(
+                            f"[VOTING] Extraction also failed for {voter['id']}: {e2}"
+                        )
                 else:
-                    logger.error(f"[VOTING] No JSON found in response")
+                    logger.error(
+                        f"[VOTING] No JSON found in response from {voter['id']}"
+                    )
+
         logger.info(f"[VOTING] Total votes collected: {len(all_votes)}")
         return all_votes
 
-    def aggregate_scores(self, votes: dict, mapping: dict) -> list[dict]:
+    def aggregate_scores(
+        self, votes: dict, mapping: dict, council_members: list[dict]
+    ) -> list[dict]:
         results = []
         for label, member_id in mapping.items():
             criterion_totals = {}
@@ -90,13 +121,13 @@ class VotingService:
                 criterion: total / criterion_counts[criterion]
                 for criterion, total in criterion_totals.items()
             }
-            overall_average = (
-                sum(average_scores.values()) / len(average_scores)
-                if average_scores
-                else 0
+            weighted_sum = sum(
+                average_scores.get(criterion, 0) * weight
+                for criterion, weight in SCORING_WEIGHTS.items()
             )
+            overall_average = weighted_sum if average_scores else 0
             member = next(
-                (m for m in COUNCIL_MEMBERS if m["id"] == member_id),
+                (m for m in council_members if m["id"] == member_id),
                 None,
             )
             member_name = member["name"] if member else member_id

@@ -31,7 +31,7 @@ export interface VotingResult {
   overallAverage: number;
 }
 
-export type CouncilMode = 'fast' | 'comprehensive';
+export type CouncilMode = 'fast' | 'comprehensive' | 'deep';
 
 export interface CouncilState {
   phase: 'idle' | 'answering' | 'voting' | 'verdict' | 'complete' | 'error';
@@ -64,3 +64,110 @@ export interface SSEEvent {
 }
 
 export type Theme = 'light' | 'dark';
+
+export interface AvailableModel {
+  id: string;
+  name: string;
+  provider: string;
+  description?: string;
+}
+
+export interface Persona {
+  id: string;
+  name: string;
+  description: string;
+  temperature: number;
+  senatorOnly?: boolean;
+}
+
+export interface CustomPersona {
+  name: string;
+  description: string;
+  temperature: number;
+  modelId?: string;
+}
+
+export interface CouncilMemberSelection {
+  personaId: string;
+  modelId: string;
+}
+
+export interface CouncilConfig {
+  councilMembers: CouncilMemberSelection[];
+  senatorPersona: string;
+  senatorModel: string;
+  customPersona?: CustomPersona | null;
+}
+
+export const PERSONAS: Persona[] = [
+  {
+    id: 'skeptic',
+    name: 'The Skeptic',
+    description: 'Questions everything and demands evidence. Points out logical fallacies and weak reasoning.',
+    temperature: 0.3,
+  },
+  {
+    id: 'explainer',
+    name: 'The Explainer',
+    description: 'Breaks down complex topics with analogies and simple language. ELI5 master.',
+    temperature: 0.5,
+  },
+  {
+    id: 'contrarian',
+    name: 'The Contrarian',
+    description: 'Deliberately argues the opposite view to stress-test ideas. Devil\'s advocate.',
+    temperature: 0.7,
+  },
+  {
+    id: 'maximalist',
+    name: 'The Maximalist',
+    description: 'Comprehensive and thorough. Leaves nothing out. Exhaustive coverage.',
+    temperature: 0.6,
+  },
+  {
+    id: 'minimalist',
+    name: 'The Minimalist',
+    description: 'Bottom-line focused. Shortest possible correct answer. No fluff.',
+    temperature: 0.3,
+  },
+  {
+    id: 'historian',
+    name: 'The Historian',
+    description: 'Provides context, background, and origins. How did we get here?',
+    temperature: 0.4,
+  },
+  {
+    id: 'futurist',
+    name: 'The Futurist',
+    description: 'Forward-looking perspective. Trends, predictions, and what\'s coming next.',
+    temperature: 0.7,
+  },
+  {
+    id: 'pragmatist',
+    name: 'The Pragmatist',
+    description: 'Actionable advice and practical guidance. Real-world application.',
+    temperature: 0.5,
+  },
+  {
+    id: 'analyst',
+    name: 'The Analyst',
+    description: 'Data-driven and quantitative. Focuses on numbers, statistics, and logical reasoning.',
+    temperature: 0.3,
+  },
+  {
+    id: 'empath',
+    name: 'The Empath',
+    description: 'Human-centered perspective. Considers feelings, user experience, and emotional impact.',
+    temperature: 0.5,
+  },
+];
+
+export const NEUTRAL_SENATOR: Persona = {
+  id: 'neutral',
+  name: 'The Neutral Judge',
+  description: 'Unbiased synthesizer with no personality bias. Available for senator selection only.',
+  temperature: 0.25,
+  senatorOnly: true,
+};
+
+export const GREEK_LETTERS = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta'];

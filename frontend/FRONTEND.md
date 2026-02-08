@@ -523,7 +523,7 @@ import { useCallback, useRef } from 'react';
 import { useSessionStore } from '../stores/sessionStore';
 import { Message, SSEEvent } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
 export function useCouncilStream() {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -1428,7 +1428,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8001',
         changeOrigin: true,
       },
     },
@@ -1490,7 +1490,7 @@ server {
 
     # Proxy API requests to backend
     location /api {
-        proxy_pass http://backend:8000;
+        proxy_pass http://backend:8001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -1517,7 +1517,7 @@ server {
 Create a `.env` file for local development:
 
 ```bash
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8001
 ```
 
 For production, this would be the deployed backend URL.

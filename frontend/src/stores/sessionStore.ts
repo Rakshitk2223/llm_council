@@ -136,6 +136,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
           : session
       ),
     }));
+    get().saveToStorage();
   },
   appendToMessage: (id, chunk) => {
     set((state) => ({
@@ -196,9 +197,17 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const sessions: Session[] = JSON.parse(stored);
+        const sanitizedSessions = sessions.map((session) => ({
+          ...session,
+          messages: session.messages.map((message) => ({
+            ...message,
+            isThinking: false,
+            isStreaming: false,
+          })),
+        }));
         set({
-          sessions,
-          currentSessionId: sessions[0]?.id || null,
+          sessions: sanitizedSessions,
+          currentSessionId: sanitizedSessions[0]?.id || null,
         });
       }
     } catch (error) {

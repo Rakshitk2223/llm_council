@@ -1043,10 +1043,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8001
 
 # Run with uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
 ```
 
 ---
@@ -1133,8 +1133,8 @@ cp .env.example .env
 # Edit .env with your Azure OpenAI credentials
 
 # Run the server
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8001
 
 # Test health endpoint
-curl http://localhost:8000/api/health
+curl http://localhost:8001/api/health
 ```

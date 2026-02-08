@@ -113,7 +113,7 @@ docker-compose up --build
 # Backend
 cd backend
 docker build -t axis-council-backend .
-docker run -p 8000:8000 --env-file ../.env axis-council-backend
+docker run -p 8001:8001 --env-file ../.env axis-council-backend
 
 # Frontend
 cd frontend

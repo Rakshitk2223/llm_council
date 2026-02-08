@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { Message } from '../../types';
-import { getMemberColor } from '../../utils/memberConfig';
 import { RobotAvatar } from './RobotAvatar';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
@@ -18,7 +17,7 @@ function CopyButton({ content }: { content: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-white/10 text-text-secondary hover:text-text-primary"
+      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-md hover:bg-surface-elevated text-text-secondary hover:text-text-primary"
       title={copied ? 'Copied!' : 'Copy to clipboard'}
     >
       {copied ? (
@@ -73,94 +72,68 @@ export function CardsView({ messages }: CardsViewProps) {
     return null;
   }
 
+  const activeMessage = councilMessages[currentIndex];
+  const memberId = activeMessage?.memberId || 'alpha';
+
   return (
     <div className="mb-4">
       <div className="relative">
-        <div className="overflow-hidden">
-          <div 
-            className="flex transition-transform duration-300 ease-out"
-            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        <div className="group">
+          <div
+            className="glass-elevated border-l-4 border-border px-4 py-4 rounded-xl rounded-l-sm transition-colors hover:bg-surface-elevated/80"
           >
-            {councilMessages.map((message, index) => {
-              const memberId = message.memberId || 'alpha';
-              const isActive = index === currentIndex;
-              const { color } = getMemberColor(memberId);
-
-              return (
-                <div
-                  key={message.id}
-                  className="group w-full flex-shrink-0 relative"
-                  style={{
-                    opacity: isActive ? 0.7 : 0.2,
-                    transition: 'opacity 0.3s ease-out',
-                  }}
-                >
-                  <div
-                    className="glass-elevated border-l-4 px-4 py-4 rounded-xl rounded-l-sm transition-all duration-300"
-                    style={{ borderLeftColor: color }}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <RobotAvatar memberId={memberId} size="md" />
-                      <div className="flex items-center gap-2 flex-1">
-                        <span className="font-semibold text-sm">{message.memberName}</span>
-                        {message.isThinking && <ThinkingIndicator />}
-                        {message.isStreaming && (
-                          <span className="text-xs text-accent animate-pulse">streaming...</span>
-                        )}
-                      </div>
-                      {message.content && !message.isThinking && (
-                        <CopyButton content={message.content} />
-                      )}
-                    </div>
-                    {!message.isThinking && message.content && (
-                      <div className="prose prose-sm max-w-none text-text-secondary dark:prose-invert">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
-                      </div>
-                    )}
-                  </div>
-
-                  {isActive && (
-                    <>
-                      <button
-                        onClick={goToPrevious}
-                        disabled={currentIndex === 0}
-                        className="absolute top-3 right-20 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
-                        aria-label="Previous response"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={goToNext}
-                        disabled={currentIndex === councilMessages.length - 1}
-                        className="absolute top-3 right-12 p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all z-10"
-                        aria-label="Next response"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+            <div className="flex items-center gap-3 mb-3">
+              <RobotAvatar memberId={memberId} size="md" />
+              <div className="flex items-center gap-2 flex-1">
+                <span className="font-semibold text-sm text-text-primary">{activeMessage.memberName}</span>
+                {activeMessage.isThinking && <ThinkingIndicator />}
+                {activeMessage.isStreaming && (
+                  <span className="text-xs text-accent animate-pulse">streaming...</span>
+                )}
+              </div>
+              <button
+                onClick={goToPrevious}
+                disabled={currentIndex === 0}
+                className="p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
+                aria-label="Previous response"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={goToNext}
+                disabled={currentIndex === councilMessages.length - 1}
+                className="p-1.5 glass rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-surface-elevated/50 transition-all"
+                aria-label="Next response"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              {activeMessage.content && !activeMessage.isThinking && (
+                <CopyButton content={activeMessage.content} />
+              )}
+            </div>
+            {!activeMessage.isThinking && activeMessage.content && (
+              <div className="prose prose-sm max-w-none text-text-primary dark:prose-invert">
+                <ReactMarkdown>{activeMessage.content}</ReactMarkdown>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex justify-center gap-2 mt-3">
           {councilMessages.map((message, index) => {
-            const memberId = message.memberId || 'alpha';
             const isActive = index === currentIndex;
             return (
               <button
                 key={message.id}
                 onClick={() => setCurrentIndex(index)}
                 className={`
-                  h-1.5 rounded-full transition-all duration-300
+                  h-1.5 rounded-full transition-all
                   ${isActive 
-                    ? `w-6 bg-${memberId}` 
+                    ? 'w-6 bg-primary' 
                     : 'w-1.5 bg-border hover:bg-text-muted'
                   }
                 `}

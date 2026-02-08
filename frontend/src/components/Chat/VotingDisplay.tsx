@@ -10,21 +10,24 @@ interface VotingDisplayProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 8) return 'text-green-400';
-  if (score >= 6) return 'text-yellow-400';
-  return 'text-red-400';
+  if (score >= 8) return 'text-text-primary';
+  if (score >= 6) return 'text-text-secondary';
+  return 'text-text-muted';
 }
 
 function getBarColor(score: number): string {
-  if (score >= 8) return 'bg-green-500';
-  if (score >= 6) return 'bg-yellow-500';
-  return 'bg-red-500';
+  if (score >= 8) return 'bg-text-primary';
+  if (score >= 6) return 'bg-text-primary/70';
+  return 'bg-text-primary/50';
 }
 
 export function VotingDisplay({ results, mapping, votes }: VotingDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (results.length === 0) return null;
+
+  const hasScores = results.some((r) => r.overallAverage > 0);
+  if (!hasScores) return null;
 
   return (
     <div className="mb-4">
@@ -41,7 +44,7 @@ export function VotingDisplay({ results, mapping, votes }: VotingDisplayProps) {
                 {(result.overallAverage || 0).toFixed(1)}
               </span>
               {idx === 0 && (
-                <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full">
+                <span className="text-[10px] bg-text-primary/20 text-text-primary px-1.5 py-0.5 rounded-full">
                   top
                 </span>
               )}
@@ -87,6 +90,7 @@ export function VotingDisplay({ results, mapping, votes }: VotingDisplayProps) {
                       <span>Rel: {(scores.relevance || 0).toFixed(1)}</span>
                       <span>Clr: {(scores.clarity || 0).toFixed(1)}</span>
                       <span>Cmp: {(scores.completeness || 0).toFixed(1)}</span>
+                      <span>Cnf: {(scores.factual_confidence || 0).toFixed(1)}</span>
                     </div>
                   </div>
                 </div>
