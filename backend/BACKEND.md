@@ -91,7 +91,6 @@ COUNCIL_MEMBERS = [
         # model: The model name to use
         # - For OpenAI: "gpt-4o-mini", "gpt-4o", etc.
         # - For Azure OpenAI: The deployment name (nickname given to the model)
-        # - For LM Studio/Ollama: The model you have loaded (e.g., "qwen2.5-8b")
         "model": "gpt-4o-mini",
         "temperature": 0.3,
         "persona": """You are Axis Alpha, a precise and analytical council member of the Axis Council.

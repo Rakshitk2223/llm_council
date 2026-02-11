@@ -87,7 +87,7 @@ export function Layout() {
 
         <main className="flex-1 flex flex-col min-h-0">
           <div className="hidden md:flex items-center px-6 py-3 bg-header border-b border-header">
-            <h2 className="font-semibold text-white">Council Chamber</h2>
+            <h2 className="font-semibold text-white">LLM Council Chamber</h2>
           </div>
           <div className="flex-1 overflow-hidden">
             <ChatArea />
