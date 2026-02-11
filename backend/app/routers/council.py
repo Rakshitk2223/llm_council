@@ -4,7 +4,13 @@ import traceback
 from sse_starlette.sse import EventSourceResponse
 from fastapi import APIRouter, Depends
 
-from app.config import AVAILABLE_MODELS, PERSONAS, NEUTRAL_SENATOR, SENATOR_PERSONA_IDS
+from app.config import (
+    COUNCIL_MODELS,
+    SENATOR_MODELS,
+    PERSONAS,
+    NEUTRAL_SENATOR,
+    SENATOR_PERSONA_IDS,
+)
 from app.middleware.auth import get_current_user
 from app.middleware.rate_limit import check_rate_limit, get_remaining_queries
 from app.models.schemas import QueryRequest
@@ -62,7 +68,7 @@ async def query_council(
 
 @router.get("/config/models")
 async def get_available_models():
-    return {"models": AVAILABLE_MODELS}
+    return {"council_models": COUNCIL_MODELS, "senator_models": SENATOR_MODELS}
 
 
 @router.get("/config/personas")

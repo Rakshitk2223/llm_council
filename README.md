@@ -8,164 +8,190 @@ Axis Council is an AI module designed for integration with web applications. It 
 
 - **Multiple Council Members**: 3 AI personas (Axis Alpha, Beta, Gamma) that independently answer queries
 - **Blind Voting**: Council members rate each other's responses without knowing which is theirs
-- **Senator Verdict**: A neutral judge (Senator Axis) delivers the final verdict with justification
+- **Senator Verdict**: A neutral judge (Senator Axis) delivers the final verdict
 - **Full Transparency**: Users see the entire deliberation process in real-time
+- **Multi-Provider Support**: Works with Azure OpenAI, Azure Foundry, and optional third-party providers (xAI, Anthropic)
+- **Persona Options**: Choose from 10+ personas or use "No Persona" for direct queries
+- **Smart Model Assignment**: Random assignment of cost-effective models for council, premium models for senator
 
 ## Quick Start
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Azure OpenAI API access (endpoint + API key + deployment names)
+- Python 3.10+ (backend)
+- Node.js 18+ (frontend)
+- Azure OpenAI API access (primary provider)
 
-### Setup
+### Backend Setup
 
-1. **Clone and configure environment**
+1. **Navigate to backend directory**
+   ```bash
+   cd llm_councilmen/backend
+   ```
 
-cd llm_councilmen
-# Copy environment template
-cp .env.example .env
-# Edit .env with your Azure OpenAI credentials
+2. **Create virtual environment**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Linux/Mac
+   # or
+   .venv\Scripts\activate  # Windows
+   ```
 
-2. **Configure Azure OpenAI**
-Edit `.env` with your credentials:
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_API_KEY=your-api-key
-AZURE_OPENAI_API_VERSION=2024-02-15-preview
-JWT_SECRET=your-jwt-secret
+4. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Azure OpenAI credentials
+   ```
 
-3. **Update deployment names**
+5. **Run the server**
+   ```bash
+   uvicorn app.main:app --reload --port 8001
+   ```
 
-Edit `backend/app/config.py` and update the `deployment_name` for each council member to match your Azure OpenAI deployments.
+### Frontend Setup
 
-4. **Run with Docker Compose**
+1. **Navigate to frontend directory**
+   ```bash
+   cd llm_councilmen/frontend
+   ```
 
-docker-compose up --build
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-5. **Access the application**
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8001
-- Health Check: http://localhost:8001/api/health
+3. **Run the dev server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8001
+   - Health Check: http://localhost:8001/api/health
+
+## Configuration
+
+### Environment Variables (Backend `.env`)
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI resource endpoint | Yes |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key | Yes |
+| `AZURE_OPENAI_API_VERSION` | API version (default: 2024-02-15-preview) | No |
+| `AZURE_FOUNDRY_ENDPOINT` | Azure Foundry endpoint (optional) | No |
+| `AZURE_FOUNDRY_API_KEY` | Azure Foundry API key (optional) | No |
+| `XAI_API_KEY` | xAI API key for Grok models (optional) | No |
+| `ANTHROPIC_API_KEY` | Anthropic API key for Claude (optional) | No |
+
+**Note**: Authentication is disabled by default (`AUTH_DISABLED=true`). JWT settings are optional.
+
+### Model Configuration
+
+Models are configured in `backend/app/config.py`:
+
+**Council Members** (cost-effective for multiple responses):
+- Claude Haiku 3.5
+- Grok 4.1 Fast
+- GPT-4o Mini
+- GPT-4o
+
+**Senator** (premium for final verdict):
+- GPT-4.1
+- Claude Sonnet 3.5
+- Grok 4
+- GPT-4o
+
+To modify available models, edit the `COUNCIL_MODELS` and `SENATOR_MODELS` lists in `backend/app/config.py`.
+
+### Persona Configuration
+
+Personas are defined in `backend/app/config.py`. To add a new persona:
+
+```python
+{
+    "id": "your_persona_id",
+    "name": "Persona Name",
+    "description": "Brief description",
+    "temperature": 0.5,
+    "persona": """Persona instructions...""",
+}
+```
+
+The "none" persona (no persona) is available for direct queries without persona influence.
 
 ## Project Structure
+
+```
 llm_councilmen/
 ├── backend/                    # Python FastAPI backend
 │   ├── app/
 │   │   ├── main.py            # FastAPI entry point
-│   │   ├── config.py          # LLM configuration
+│   │   ├── config.py          # Configuration & models
 │   │   ├── routers/           # API endpoints
-│   │   ├── services/          # Business logic
+│   │   ├── services/          # Business logic (council, voting, LLM)
 │   │   ├── models/            # Pydantic schemas
-│   │   └── middleware/        # Auth & rate limiting
+│   │   └── middleware/        # Auth (disabled by default)
 │   ├── requirements.txt
-│   ├── Dockerfile
+│   ├── .env.example
 │   └── BACKEND.md             # Backend documentation
 │
-├─ frontend/                   # React + Vite frontend
+├── frontend/                   # React + Vite frontend
 │   ├── src/
 │   │   ├── components/        # React components
 │   │   ├── hooks/             # Custom hooks
-│   │   ├── stores/            # State management
+│   │   ├── stores/            # State management (Zustand)
 │   │   ├── services/          # API client
 │   │   ├── types/             # TypeScript types
 │   │   └── styles/            # CSS & theme
 │   ├── package.json
-│   ├── Dockerfile
 │   └── FRONTEND.md            # Frontend documentation
 │
-├── docker-compose.yml         # Container orchestration
-├── .env.example               # Environment template
 └── README.md                  # This file
-
-### Environment Variables
-
-| Variable                   | Description                                | Required |
-| -------------------------- | ------------------------------------------ | -------- |
-| `AZURE_OPENAI_ENDPOINT`    | Azure OpenAI resource endpoint             | Yes      |
-| `AZURE_OPENAI_API_KEY`     | Azure OpenAI API key                       | Yes      |
-| `AZURE_OPENAI_API_VERSION` | API version (default: 2024-02-15-preview)  | Yes      |
-| `JWT_SECRET`               | Secret for JWT validation                  | Yes      |
-| `JWT_ALGORITHM`            | JWT algorithm (default: HS256)             | No       |
-| `RATE_LIMIT_PER_DAY`       | Queries per user per day (default: 20)     | No       |
-| `FRONTEND_URL`             | Frontend URL for CORS (default: localhost) | No       |
-
-### Adding/Removing Council Members
-
-Edit `backend/app/config.py`:
-
-```python
-COUNCIL_MEMBERS = [
-    {
-        "id": "alpha",
-        "name": "Axis Alpha",
-        "deployment_name": "your-gpt4o-mini-deployment",  # Azure deployment name
-        "temperature": 0.3,
-        "persona": "..."
-    },
-    # Add or remove members here
-]
 ```
 
-The system automatically adjusts to the number of council members in the list.
+## Development to Production
 
-## API Endpoints
+### Changes for Production
 
-| Method | Endpoint           | Description               | Auth     |
-| ------ | ------------------ | ------------------------- | -------- |
-| POST   | /api/council/query | Submit query (SSE stream) | Required |
-| GET    | /api/health        | Health check              | None     |
+1. **Environment Variables**:
+   - Set `FRONTEND_URL` to your production domain
+   - Enable authentication if needed (`AUTH_DISABLED=false`)
+   - Set strong `JWT_SECRET`
 
-## Integration Guide
+2. **CORS Configuration**:
+   - Update `FRONTEND_URL` in `.env` to match your production frontend URL
+   - Example: `FRONTEND_URL=https://yourdomain.com`
 
-### For the Main Dashboard Team
-1. **Authentication**: Pass the user's JWT token in the Authorization header:
-   Authorization: Bearer <user-jwt-token>
-2. **JWT Secret**: Share the same JWT secret used by the main authentication system.
-3. **Routing**: Add a route to the Axis Council page:
+3. **Build Frontend**:
+   ```bash
+   cd frontend
+   npm run build
+   ```
 
-   /ai-council → Axis Council React component
+4. **Static File Serving**:
+   - Serve built frontend files from backend or use a reverse proxy (nginx)
 
-4. **Theme Customization**: Update CSS variables in `frontend/src/styles/theme.css` to match your dashboard theme.
+### Security Considerations
 
-### Deployment Options
+- Never commit `.env` files with real credentials
+- Use strong JWT secrets in production
+- Enable rate limiting if needed (`RATE_LIMIT_PER_DAY`)
+- Configure CORS properly for your domain
 
-The Docker containers can be deployed on:
+## Troubleshooting
 
-- AWS EC2 / ECS
-- Azure VM / Container Apps
-- Any Docker-compatible platform
+**Backend won't start**: Check that all required environment variables are set in `.env`
 
-## Rate Limiting
-- Default: 20 queries per user per day
-- Resets at midnight (server time)
-- Each question (including follow-ups) counts against the limit
+**Model not available error**: Ensure the provider API keys are configured for the requested model
 
-## Error Messages
-| Scenario           | Message                                      |
-| ------------------ | -------------------------------------------- |
-| Not logged in      | "Please login first to use Axis Council"     |
-| Rate limit reached | "You have reached your daily freemium limit" |
-| Server error       | "Council is temporarily unavailable"         |
+**CORS errors**: Update `FRONTEND_URL` in backend `.env` to match your frontend URL
 
-## Development
+## License
 
-### Backend
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with credentials
-uvicorn app.main:app --reload --port 8001
-```
-
-### Frontend
-
-```bash
-cd frontend
-bun install
-bun run dev
-```
+MIT License - See LICENSE file for details

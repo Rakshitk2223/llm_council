@@ -3,12 +3,13 @@ import { persist } from 'zustand/middleware';
 
 import type { CouncilConfig, CouncilMemberSelection, CustomPersona, AvailableModel, Persona } from '../types';
 
-const DEFAULT_MODEL = 'gpt-4o';
+const DEFAULT_COUNCIL_MODEL = 'gpt-4o';
+const DEFAULT_SENATOR_MODEL = 'gpt-4o';
 
 const DEFAULT_COUNCIL: CouncilMemberSelection[] = [
-  { personaId: 'skeptic', modelId: DEFAULT_MODEL },
-  { personaId: 'explainer', modelId: DEFAULT_MODEL },
-  { personaId: 'pragmatist', modelId: DEFAULT_MODEL },
+  { personaId: 'none', modelId: DEFAULT_COUNCIL_MODEL },
+  { personaId: 'none', modelId: DEFAULT_COUNCIL_MODEL },
+  { personaId: 'none', modelId: DEFAULT_COUNCIL_MODEL },
 ];
 const DEFAULT_SENATOR = 'neutral';
 
@@ -18,7 +19,8 @@ interface SettingsStore {
   senatorModel: string;
   customPersona: CustomPersona | null;
   showSettingsPopup: boolean;
-  availableModels: AvailableModel[];
+  councilModels: AvailableModel[];
+  senatorModels: AvailableModel[];
   personas: Persona[];
   senatorPersonas: Persona[];
   isLoadingConfig: boolean;
@@ -41,10 +43,11 @@ export const useSettingsStore = create<SettingsStore>()(
     (set, get) => ({
       councilMembers: DEFAULT_COUNCIL,
       senatorPersona: DEFAULT_SENATOR,
-      senatorModel: DEFAULT_MODEL,
+      senatorModel: DEFAULT_SENATOR_MODEL,
       customPersona: null,
       showSettingsPopup: false,
-      availableModels: [{ id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI' }],
+      councilModels: [],
+      senatorModels: [],
       personas: [],
       senatorPersonas: [],
       isLoadingConfig: false,
@@ -88,7 +91,7 @@ export const useSettingsStore = create<SettingsStore>()(
         set({
           councilMembers: DEFAULT_COUNCIL,
           senatorPersona: DEFAULT_SENATOR,
-          senatorModel: DEFAULT_MODEL,
+      senatorModel: DEFAULT_SENATOR_MODEL,
           customPersona: null,
         }),
 
@@ -102,7 +105,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
           if (modelsRes.ok) {
             const modelsData = await modelsRes.json();
-            set({ availableModels: modelsData.models });
+            set({ 
+              councilModels: modelsData.council_models || [],
+              senatorModels: modelsData.senator_models || []
+            });
           }
 
           if (personasRes.ok) {

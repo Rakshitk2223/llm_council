@@ -2,14 +2,29 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    llm_base_url: str = "http://localhost:1234/v1"
-    llm_api_key: str = "not-needed"
-    azure_api_version: str = "2024-02-15-preview"
+    # Primary Provider: Azure OpenAI
+    azure_openai_api_key: str = ""
+    azure_openai_endpoint: str = ""
+    azure_openai_api_version: str = "2024-02-15-preview"
+
+    # Secondary Provider: Azure Foundry (optional)
+    azure_foundry_api_key: str = ""
+    azure_foundry_endpoint: str = ""
+
+    # Third-party Providers (optional)
+    anthropic_api_key: str = ""
+    xai_api_key: str = ""
+
+    # JWT Authentication (disabled by default)
     jwt_secret: str = "dev-secret-not-for-production"
     jwt_algorithm: str = "HS256"
-    rate_limit_per_day: int = 20
-    frontend_url: str = "http://localhost:5173"
-    auth_disabled: bool = False
+    auth_disabled: bool = True
+
+    # Rate Limiting (disabled by default)
+    rate_limit_per_day: int = 1000
+
+    # CORS (allow all for now)
+    frontend_url: str = "*"
 
     class Config:
         env_file = ".env"
@@ -21,36 +36,93 @@ MAX_TOKENS_COUNCIL = 300
 MAX_TOKENS_SENATOR = 250
 MAX_TOKENS_VOTING = 400
 
-AVAILABLE_MODELS = [
+# Council Members - Cheaper/Faster models for multiple responses
+COUNCIL_MODELS = [
     {
-        "id": "gpt-4o",
-        "name": "GPT-4o",
-        "provider": "OpenAI",
-        "description": "Most capable OpenAI model",
+        "id": "claude-haiku-3-5",
+        "name": "Claude Haiku 3.5",
+        "provider": "anthropic",
+        "description": "Fast, cost-effective",
+    },
+    {
+        "id": "grok-4-1-fast",
+        "name": "Grok 4.1 Fast",
+        "provider": "xai",
+        "description": "Quick responses",
     },
     {
         "id": "gpt-4o-mini",
         "name": "GPT-4o Mini",
-        "provider": "OpenAI",
-        "description": "Fast and cost-effective",
+        "provider": "azure",
+        "description": "Efficient and capable",
     },
     {
-        "id": "claude-3-5-sonnet",
-        "name": "Claude 3.5 Sonnet",
-        "provider": "Anthropic",
-        "description": "Anthropic's balanced model",
-    },
-    {
-        "id": "gemini-1-5-pro",
-        "name": "Gemini 1.5 Pro",
-        "provider": "Google",
-        "description": "Google's advanced model",
+        "id": "gpt-4o",
+        "name": "GPT-4o",
+        "provider": "azure",
+        "description": "Most capable",
     },
 ]
 
-DEFAULT_MODEL = "gpt-4o"
+# Senator - Premium models for final verdict
+SENATOR_MODELS = [
+    {
+        "id": "gpt-4-1",
+        "name": "GPT-4.1",
+        "provider": "azure",
+        "description": "Highest quality reasoning",
+    },
+    {
+        "id": "claude-sonnet-3-5",
+        "name": "Claude Sonnet 3.5",
+        "provider": "anthropic",
+        "description": "Excellent analysis",
+    },
+    {
+        "id": "grok-4",
+        "name": "Grok 4",
+        "provider": "xai",
+        "description": "Advanced reasoning",
+    },
+    {
+        "id": "gpt-4o",
+        "name": "GPT-4o",
+        "provider": "azure",
+        "description": "Reliable and capable",
+    },
+]
 
-USE_DEFAULT_MODEL_ONLY = True
+# Backwards compatibility - combine both for general listing
+AVAILABLE_MODELS = COUNCIL_MODELS + SENATOR_MODELS
+
+# Default models for random assignment
+DEFAULT_COUNCIL_MODEL = "gpt-4o-mini"
+DEFAULT_SENATOR_MODEL = "gpt-4o"
+
+# Flag to allow all models (set to False to enable random assignment)
+USE_DEFAULT_MODEL_ONLY = False
+
+import random
+
+
+def get_random_council_model() -> str:
+    """Get a random model from COUNCIL_MODELS."""
+    return random.choice(COUNCIL_MODELS)["id"]
+
+
+def get_random_senator_model() -> str:
+    """Get a random model from SENATOR_MODELS."""
+    return random.choice(SENATOR_MODELS)["id"]
+
+
+def get_model_for_role(role: str) -> str:
+    """Get appropriate model for role (council or senator)."""
+    if role == "council":
+        return get_random_council_model()
+    elif role == "senator":
+        return get_random_senator_model()
+    return DEFAULT_COUNCIL_MODEL
+
 
 SCORING_WEIGHTS = {
     "accuracy": 0.30,
@@ -71,6 +143,13 @@ BASE_INSTRUCTIONS = """RULES:
 GREEK_LETTERS = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta"]
 
 PERSONAS = [
+    {
+        "id": "none",
+        "name": "No Persona",
+        "description": "Direct query without persona influence.",
+        "temperature": 0.5,
+        "persona": None,
+    },
     {
         "id": "skeptic",
         "name": "The Skeptic",
@@ -205,7 +284,7 @@ FOLLOW_UP_QUESTIONS:
 1. [Max 8 words]
 2. [Max 8 words]"""
 
-DEFAULT_COUNCIL = ["skeptic", "explainer", "pragmatist"]
+DEFAULT_COUNCIL = ["none", "none", "none"]
 DEFAULT_SENATOR = "neutral"
 
 VOTING_CRITERIA = [

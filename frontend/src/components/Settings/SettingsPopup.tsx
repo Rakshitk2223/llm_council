@@ -24,7 +24,8 @@ export function SettingsPopup() {
     senatorModel,
     customPersona,
     showSettingsPopup,
-    availableModels,
+    councilModels,
+    senatorModels,
     personas: fetchedPersonas,
     senatorPersonas: fetchedSenatorPersonas,
     setCouncilMembers,
@@ -63,14 +64,34 @@ export function SettingsPopup() {
 
   const addMember = () => {
     if (localCouncil.length < 8) {
-      const usedPersonas = localCouncil.map(m => m.personaId);
-      const availablePersona = personas.find(p => !usedPersonas.includes(p.id));
-      const defaultModel = availableModels[0]?.id || 'gpt-4o';
+      const defaultModel = 'gpt-4o';
       setLocalCouncil([...localCouncil, { 
-        personaId: availablePersona?.id || personas[0].id, 
+        personaId: 'none', 
         modelId: defaultModel 
       }]);
     }
+  };
+
+  const getRandomCouncilModel = () => {
+    if (councilModels.length === 0) return 'gpt-4o';
+    const randomIndex = Math.floor(Math.random() * councilModels.length);
+    return councilModels[randomIndex].id;
+  };
+
+  const getRandomSenatorModel = () => {
+    if (senatorModels.length === 0) return 'gpt-4o';
+    const randomIndex = Math.floor(Math.random() * senatorModels.length);
+    return senatorModels[randomIndex].id;
+  };
+
+  const randomizeCouncilMemberModel = (index: number) => {
+    const randomModel = getRandomCouncilModel();
+    updateMember(index, 'modelId', randomModel);
+  };
+
+  const randomizeSenatorModel = () => {
+    const randomModel = getRandomSenatorModel();
+    setLocalSenatorModel(randomModel);
   };
 
   const removeMember = (index: number) => {
@@ -170,15 +191,24 @@ export function SettingsPopup() {
                       </div>
                       <div className="flex-1">
                         <label className="block text-xs text-text-muted mb-1">Model</label>
-                        <select
-                          value={member.modelId}
-                          onChange={(e) => updateMember(index, 'modelId', e.target.value)}
-                          className="w-full p-2 border border-border rounded bg-surface text-text-primary text-sm"
-                        >
-                          {availableModels.map((m) => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                          ))}
-                        </select>
+                        <div className="flex gap-2">
+                          <select
+                            value={member.modelId}
+                            onChange={(e) => updateMember(index, 'modelId', e.target.value)}
+                            className="flex-1 p-2 border border-border rounded bg-surface text-text-primary text-sm"
+                          >
+                            {councilModels.map((m) => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => randomizeCouncilMemberModel(index)}
+                            className="px-3 py-2 bg-surface-elevated border border-border rounded text-text-primary text-sm hover:bg-surface transition-colors"
+                            title="Random model"
+                          >
+                            🎲
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -213,15 +243,24 @@ export function SettingsPopup() {
                 </div>
                 <div className="flex-1">
                   <label className="block text-xs text-text-muted mb-1">Model</label>
-                  <select
-                    value={localSenatorModel}
-                    onChange={(e) => setLocalSenatorModel(e.target.value)}
-                    className="w-full p-2 border border-border rounded bg-surface text-text-primary text-sm"
-                  >
-                    {availableModels.map((m) => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={localSenatorModel}
+                      onChange={(e) => setLocalSenatorModel(e.target.value)}
+                      className="flex-1 p-2 border border-border rounded bg-surface text-text-primary text-sm"
+                    >
+                      {senatorModels.map((m) => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={randomizeSenatorModel}
+                      className="px-3 py-2 bg-surface-elevated border border-border rounded text-text-primary text-sm hover:bg-surface transition-colors"
+                      title="Random model"
+                    >
+                      🎲
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -302,22 +341,38 @@ export function SettingsPopup() {
                 </div>
                 <div className="flex-1">
                   <label className="block text-xs text-text-muted mb-1">Model</label>
-                  <select
-                    value={localCustom?.modelId || availableModels[0]?.id || 'gpt-4o'}
-                    onChange={(e) =>
-                      setLocalCustom({
-                        name: localCustom?.name || '',
-                        description: localCustom?.description || '',
-                        temperature: localCustom?.temperature || 0.5,
-                        modelId: e.target.value,
-                      })
-                    }
-                    className="w-full p-2 border border-border rounded bg-surface text-text-primary text-sm"
-                  >
-                    {availableModels.map((m) => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      value={localCustom?.modelId || 'gpt-4o'}
+                      onChange={(e) =>
+                        setLocalCustom({
+                          name: localCustom?.name || '',
+                          description: localCustom?.description || '',
+                          temperature: localCustom?.temperature || 0.5,
+                          modelId: e.target.value,
+                        })
+                      }
+                      className="flex-1 p-2 border border-border rounded bg-surface text-text-primary text-sm"
+                    >
+                      {councilModels.map((m) => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() =>
+                        setLocalCustom({
+                          name: localCustom?.name || '',
+                          description: localCustom?.description || '',
+                          temperature: localCustom?.temperature || 0.5,
+                          modelId: getRandomCouncilModel(),
+                        })
+                      }
+                      className="px-3 py-2 bg-surface-elevated border border-border rounded text-text-primary text-sm hover:bg-surface transition-colors"
+                      title="Random model"
+                    >
+                      🎲
+                    </button>
+                  </div>
                 </div>
               </div>
               {localCustom?.name && localCustom?.description && (

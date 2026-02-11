@@ -11,7 +11,12 @@ from app.config import (
     SENATOR_PERSONA_WRAPPER,
     DEFAULT_COUNCIL,
     DEFAULT_SENATOR,
-    DEFAULT_MODEL,
+    DEFAULT_COUNCIL_MODEL,
+    DEFAULT_SENATOR_MODEL,
+    COUNCIL_MODELS,
+    SENATOR_MODELS,
+    get_random_council_model,
+    get_random_senator_model,
     MAX_TOKENS_COUNCIL,
     MAX_TOKENS_SENATOR,
     BASE_INSTRUCTIONS,
@@ -42,7 +47,7 @@ class CouncilService:
         self,
         persona_id: str,
         index: int,
-        model_id: str = DEFAULT_MODEL,
+        model_id: str = DEFAULT_COUNCIL_MODEL,
         custom_persona: Optional[dict] = None,
     ) -> dict:
         greek = (
@@ -62,18 +67,24 @@ class CouncilService:
         if not persona:
             persona = PERSONAS[0]
 
+        # Handle "none" persona - only use BASE_INSTRUCTIONS
+        if persona_id == "none":
+            system_prompt = BASE_INSTRUCTIONS
+        else:
+            system_prompt = f"{persona['persona']}\n\n{BASE_INSTRUCTIONS}"
+
         return {
             "id": persona["id"],
             "name": f"Axis {greek} - {persona['name']}",
             "model": model_id,
             "temperature": persona["temperature"],
-            "persona": f"{persona['persona']}\n\n{BASE_INSTRUCTIONS}",
+            "persona": system_prompt,
         }
 
     def _build_senator(
         self,
         persona_id: str,
-        model_id: str = DEFAULT_MODEL,
+        model_id: str = DEFAULT_SENATOR_MODEL,
         custom_persona: Optional[dict] = None,
     ) -> dict:
         if persona_id == "custom" and custom_persona:
