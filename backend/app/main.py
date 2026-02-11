@@ -24,3 +24,5 @@ app.include_router(council.router)
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "service": "axis-council"}
+
+

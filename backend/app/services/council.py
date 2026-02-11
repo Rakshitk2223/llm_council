@@ -14,7 +14,7 @@ from app.config import (
     DEFAULT_MODEL,
     MAX_TOKENS_COUNCIL,
     MAX_TOKENS_SENATOR,
-    RESPONSE_FORMAT_INSTRUCTIONS,
+    BASE_INSTRUCTIONS,
 )
 from app.models.schemas import CouncilConfig
 from app.services.llm_service import LLMService, TokenTracker
@@ -55,11 +55,7 @@ class CouncilService:
                 "name": f"Axis {greek} - {custom_persona['name']}",
                 "model": custom_persona.get("model_id") or model_id,
                 "temperature": custom_persona.get("temperature", 0.5),
-                "persona": CUSTOM_PERSONA_WRAPPER.format(
-                    custom_name=custom_persona["name"],
-                    custom_description=custom_persona["description"],
-                    RESPONSE_FORMAT_INSTRUCTIONS=RESPONSE_FORMAT_INSTRUCTIONS,
-                ),
+                "persona": f"{CUSTOM_PERSONA_WRAPPER.format(custom_name=custom_persona['name'], custom_description=custom_persona['description'])}\n\n{BASE_INSTRUCTIONS}",
             }
 
         persona = self._get_persona(persona_id)
@@ -71,7 +67,7 @@ class CouncilService:
             "name": f"Axis {greek} - {persona['name']}",
             "model": model_id,
             "temperature": persona["temperature"],
-            "persona": persona["persona"],
+            "persona": f"{persona['persona']}\n\n{BASE_INSTRUCTIONS}",
         }
 
     def _build_senator(
@@ -84,17 +80,13 @@ class CouncilService:
             base_persona = CUSTOM_PERSONA_WRAPPER.format(
                 custom_name=custom_persona["name"],
                 custom_description=custom_persona["description"],
-                RESPONSE_FORMAT_INSTRUCTIONS=RESPONSE_FORMAT_INSTRUCTIONS,
             )
             return {
                 "id": "senator",
                 "name": f"Senator - {custom_persona['name']}",
                 "model": custom_persona.get("model_id") or model_id,
                 "temperature": custom_persona.get("temperature", 0.5),
-                "persona": SENATOR_PERSONA_WRAPPER.format(
-                    persona_name=custom_persona["name"],
-                    persona_base=base_persona,
-                ),
+                "persona": f"{SENATOR_PERSONA_WRAPPER.format(persona_name=custom_persona['name'], persona_base=base_persona)}\n\n{BASE_INSTRUCTIONS}",
             }
 
         if persona_id == "neutral":
@@ -103,7 +95,7 @@ class CouncilService:
                 "name": f"Senator - {NEUTRAL_SENATOR['name']}",
                 "model": model_id,
                 "temperature": NEUTRAL_SENATOR["temperature"],
-                "persona": NEUTRAL_SENATOR["persona"],
+                "persona": f"{NEUTRAL_SENATOR['persona']}\n\n{BASE_INSTRUCTIONS}",
             }
 
         persona = self._get_persona(persona_id)
@@ -115,10 +107,7 @@ class CouncilService:
             "name": f"Senator - {persona['name']}",
             "model": model_id,
             "temperature": persona["temperature"],
-            "persona": SENATOR_PERSONA_WRAPPER.format(
-                persona_name=persona["name"],
-                persona_base=persona["persona"],
-            ),
+            "persona": f"{SENATOR_PERSONA_WRAPPER.format(persona_name=persona['name'], persona_base=persona['persona'])}\n\n{BASE_INSTRUCTIONS}",
         }
 
     def _build_council(
@@ -371,20 +360,17 @@ class CouncilService:
                 for response in responses
                 if response["member_id"] == member_id
             )
-            member_name = result["member_name"]
             scores = result["average_scores"]
             overall = result["overall_average"]
-            rank_note = "(HIGHEST RATED)" if idx == 0 else f"(Rank #{idx + 1})"
             response_details.append(
                 """
-{member_name}'s Response {rank_note}:
+Response {idx}:
 "{response_text}"
 
 Scores: Accuracy: {accuracy:.1f} | Relevance: {relevance:.1f} | Clarity: {clarity:.1f} | Completeness: {completeness:.1f} | Confidence: {factual_confidence:.1f}
 Overall: {overall:.1f}/10
 """.format(
-                    member_name=member_name,
-                    rank_note=rank_note,
+                    idx=idx + 1,
                     response_text=response_text,
                     accuracy=scores.get("accuracy", 0),
                     relevance=scores.get("relevance", 0),
@@ -396,11 +382,11 @@ Overall: {overall:.1f}/10
             )
         return """Question: {query}
 
-Council Responses (ranked by score):
+Council Responses:
 
 {response_details}
 
-Analyze the responses and give YOUR final answer. Match the format to what was asked.""".format(
+Give YOUR final answer. Match the format to what was asked.""".format(
             query=query,
             response_details="\n\n".join(response_details),
         )
