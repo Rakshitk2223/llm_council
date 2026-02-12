@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { ErrorBoundary } from './components/Error/ErrorBoundary';
 import { Layout } from './components/Layout';
+import { ToastContainer } from './components/Toast';
 import { useLayoutStore } from './stores/layoutStore';
 import { useSessionStore } from './stores/sessionStore';
 import './styles/theme.css';
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Layout />
+      <ToastContainer />
     </ErrorBoundary>
   );
 }

@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 
 import { parseFollowUpQuestions, removeFollowUpSection } from '../components/Chat/FollowUpSuggestions';
+import { addToast } from '../components/Toast';
 import { useSessionStore } from '../stores/sessionStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import type { CouncilMode, SSEEvent, SSEEventType } from '../types';
@@ -125,6 +126,7 @@ export function useCouncilStream() {
       }
       const errorMessage = error.message || 'Council is temporarily unavailable';
       setError(errorMessage);
+      addToast(errorMessage, 'error', 5000);
       addMessage({ role: 'system', content: errorMessage });
     }
   }, []);
@@ -228,9 +230,12 @@ export function useCouncilStream() {
           setQueriesRemaining(event.data.queries_remaining);
         }
         break;
-      case 'error':
-        setError(event.data.error || 'Council is temporarily unavailable');
+      case 'error': {
+        const errorMsg = event.data.error || 'Council is temporarily unavailable';
+        setError(errorMsg);
+        addToast(errorMsg, 'error', 5000);
         break;
+      }
       default:
         break;
     }

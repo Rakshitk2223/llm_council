@@ -9,9 +9,20 @@ from app.config import (
     COUNCIL_MODELS,
     SENATOR_MODELS,
     AVAILABLE_MODELS,
+    USE_GPT4O_AS_DEFAULT,
+    MAX_QUERY_WORDS,
 )
 
 logger = logging.getLogger("council")
+
+
+class ModelNotAvailableError(Exception):
+    """Raised when a model is not available due to provider not configured."""
+
+    def __init__(self, model_name: str, user_message: str):
+        self.model_name = model_name
+        self.user_message = user_message
+        super().__init__(f"Model {model_name} not available: {user_message}")
 
 
 @dataclass
@@ -143,50 +154,76 @@ class LLMService:
             model_map[model["id"]] = model["provider"]
         return model_map
 
-    def _get_client_for_model(self, model: str):
-        """Get the appropriate client for a model."""
-        provider = self.model_map.get(model, "azure")
+    def _get_client_for_model(self, requested_model: str):
+        """Get the appropriate client for a model with safety checks."""
+
+        # Safety override: If USE_GPT4O_AS_DEFAULT is True, always use gpt-4o
+        if USE_GPT4O_AS_DEFAULT:
+            if "azure" in self.clients:
+                return self.clients["azure"], "gpt-4o"
+            elif "azure_foundry" in self.clients:
+                return self.clients["azure_foundry"], "gpt-4o"
+            else:
+                raise ModelNotAvailableError(
+                    "GPT-4o",
+                    "AI service is temporarily unavailable. Please try again later.",
+                )
+
+        # Normal flow: Check if requested model is available
+        provider = self.model_map.get(requested_model, "azure")
+        model_name = self._get_model_display_name(requested_model)
 
         # Route to appropriate client
         if provider == "azure":
             if "azure" in self.clients:
-                return self.clients["azure"], model
+                return self.clients["azure"], requested_model
             elif "azure_foundry" in self.clients:
-                return self.clients["azure_foundry"], model
+                return self.clients["azure_foundry"], requested_model
             else:
-                raise RuntimeError(f"Azure provider not configured for model {model}")
+                raise ModelNotAvailableError(
+                    model_name,
+                    f"{model_name} is not available right now. Please try another model like GPT-4o or Grok 4.",
+                )
 
         elif provider == "xai":
             if "xai" in self.clients:
-                return self.clients["xai"], model
+                return self.clients["xai"], requested_model
             else:
-                raise RuntimeError(
-                    f"xAI provider not configured for model {model}. "
-                    f"Please add XAI_API_KEY to your .env file"
+                raise ModelNotAvailableError(
+                    model_name,
+                    f"{model_name} is not available right now. Please try GPT-4o or Claude instead.",
                 )
 
         elif provider == "anthropic":
-            # For now, Claude models need Anthropic client
             if settings.anthropic_api_key:
-                # We'll need to implement Anthropic-specific handling
-                # For now, raise an error with instructions
-                raise RuntimeError(
-                    f"Claude model {model} requires Anthropic provider. "
-                    f"Anthropic support will be implemented soon. "
-                    f"Please use Azure or xAI models for now."
+                # For now, Claude models through Anthropic direct API
+                raise ModelNotAvailableError(
+                    model_name,
+                    f"{model_name} is not available right now. Please try GPT-4o or Grok 4 instead.",
                 )
             else:
-                raise RuntimeError(
-                    f"Anthropic API key not configured for model {model}"
+                raise ModelNotAvailableError(
+                    model_name,
+                    f"{model_name} is not available right now. Please try GPT-4o or Grok 4 instead.",
                 )
 
         # Default fallback
         if "azure" in self.clients:
-            return self.clients["azure"], model
+            return self.clients["azure"], requested_model
         elif "azure_foundry" in self.clients:
-            return self.clients["azure_foundry"], model
+            return self.clients["azure_foundry"], requested_model
         else:
-            raise RuntimeError(f"No suitable provider found for model {model}")
+            raise ModelNotAvailableError(
+                model_name,
+                "AI service is temporarily unavailable. Please try again later.",
+            )
+
+    def _get_model_display_name(self, model_id: str) -> str:
+        """Get human-readable model name."""
+        for model in AVAILABLE_MODELS:
+            if model["id"] == model_id:
+                return model["name"]
+        return model_id
 
     async def generate_response(
         self,
@@ -197,7 +234,14 @@ class LLMService:
         max_tokens: int = 512,
         token_usage: TokenUsage | None = None,
     ) -> str:
-        client, actual_model = self._get_client_for_model(model)
+        try:
+            client, actual_model = self._get_client_for_model(model)
+        except ModelNotAvailableError as e:
+            # Re-raise with user-friendly message for frontend
+            logger.error(
+                f"[LLM] Model not available: {e.model_name} - {e.user_message}"
+            )
+            raise
 
         try:
             response = await client.chat.completions.create(
@@ -221,6 +265,17 @@ class LLMService:
             return response.choices[0].message.content or ""
         except Exception as e:
             logger.error(f"[LLM] Error generating response: {str(e)}")
+            # Check if it's an API key error
+            error_str = str(e).lower()
+            if (
+                "401" in error_str
+                or "unauthorized" in error_str
+                or "api key" in error_str
+            ):
+                raise ModelNotAvailableError(
+                    self._get_model_display_name(model),
+                    "AI service is temporarily unavailable. Please try again later.",
+                )
             raise
 
     async def generate_response_stream(
@@ -232,7 +287,12 @@ class LLMService:
         max_tokens: int = 512,
         token_usage: TokenUsage | None = None,
     ) -> AsyncGenerator[str, None]:
-        client, actual_model = self._get_client_for_model(model)
+        try:
+            client, actual_model = self._get_client_for_model(model)
+        except ModelNotAvailableError:
+            # Re-raise to be handled by caller
+            raise
+
         char_count = 0
 
         try:

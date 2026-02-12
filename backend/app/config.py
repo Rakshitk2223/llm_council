@@ -99,8 +99,13 @@ AVAILABLE_MODELS = COUNCIL_MODELS + SENATOR_MODELS
 DEFAULT_COUNCIL_MODEL = "gpt-4o-mini"
 DEFAULT_SENATOR_MODEL = "gpt-4o"
 
-# Flag to allow all models (set to False to enable random assignment)
-USE_DEFAULT_MODEL_ONLY = False
+# Safety switch: Force all models to use GPT-4o
+# When True: All model selections are overridden to gpt-4o
+# When False: Uses actual selected models with provider validation
+USE_GPT4O_AS_DEFAULT = True
+
+# Maximum query length (in words)
+MAX_QUERY_WORDS = 500
 
 import random
 

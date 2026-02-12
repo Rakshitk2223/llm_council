@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { addToast } from '../Toast';
 import { FollowUpSuggestions } from '../Chat/FollowUpSuggestions';
 import { useCouncilStream } from '../../hooks/useCouncilStream';
 import { useModeStore } from '../../stores/modeStore';
 import { useSessionStore } from '../../stores/sessionStore';
+
+// Maximum query length in words - can be adjusted as needed
+const MAX_QUERY_WORDS = 500;
 
 export function InputArea() {
   const [query, setQuery] = useState('');
@@ -17,6 +21,11 @@ export function InputArea() {
     councilState.phase !== 'complete' &&
     councilState.phase !== 'error';
 
+  // Calculate word count
+  const wordCount = query.trim() ? query.trim().split(/\s+/).length : 0;
+  const isOverLimit = wordCount > MAX_QUERY_WORDS;
+  const isNearLimit = wordCount > MAX_QUERY_WORDS * 0.8;
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -25,7 +34,23 @@ export function InputArea() {
   }, [query]);
 
   const submitQuestion = async (questionText: string) => {
-    if (!questionText.trim() || isProcessing) {
+    const trimmedQuestion = questionText.trim();
+    
+    if (!trimmedQuestion || isProcessing) {
+      if (!trimmedQuestion) {
+        addToast('Please enter a question first.', 'warning', 3000);
+      }
+      return;
+    }
+
+    // Check word count
+    const words = trimmedQuestion.split(/\s+/);
+    if (words.length > MAX_QUERY_WORDS) {
+      addToast(
+        `Your question is too long (${words.length} words). Please keep it under ${MAX_QUERY_WORDS} words.`,
+        'error',
+        5000
+      );
       return;
     }
 
@@ -36,7 +61,7 @@ export function InputArea() {
 
     setQuery('');
     const authToken = localStorage.getItem('auth_token') || '';
-    await submitQuery(questionText.trim(), authToken, mode);
+    await submitQuery(trimmedQuestion, authToken, mode);
   };
 
   const handleSubmit = async () => {
@@ -82,7 +107,7 @@ export function InputArea() {
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={!query.trim()}
+            disabled={!query.trim() || isOverLimit}
             className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 font-medium"
           >
             Send
@@ -90,11 +115,18 @@ export function InputArea() {
         )}
       </div>
 
-      {councilState.queriesRemaining !== undefined && (
-        <p className="text-xs text-text-muted mt-2 text-right">
-          {councilState.queriesRemaining} queries remaining today
+      <div className="flex justify-between items-center mt-2">
+        <p className={`text-xs ${isOverLimit ? 'text-error font-medium' : isNearLimit ? 'text-warning' : 'text-text-muted'}`}>
+          {wordCount} / {MAX_QUERY_WORDS} words
+          {isOverLimit && ' (too long)'}
         </p>
-      )}
+        
+        {councilState.queriesRemaining !== undefined && (
+          <p className="text-xs text-text-muted">
+            {councilState.queriesRemaining} queries remaining today
+          </p>
+        )}
+      </div>
     </div>
   );
 }

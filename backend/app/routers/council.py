@@ -1,7 +1,10 @@
 import json
+import logging
 import traceback
 
 from sse_starlette.sse import EventSourceResponse
+
+logger = logging.getLogger("council")
 from fastapi import APIRouter, Depends
 
 from app.config import (
@@ -10,13 +13,20 @@ from app.config import (
     PERSONAS,
     NEUTRAL_SENATOR,
     SENATOR_PERSONA_IDS,
+    MAX_QUERY_WORDS,
 )
 from app.middleware.auth import get_current_user
 from app.middleware.rate_limit import check_rate_limit, get_remaining_queries
 from app.models.schemas import QueryRequest
 from app.services.council import CouncilService
+from app.services.llm_service import ModelNotAvailableError
 
 router = APIRouter(prefix="/api/council", tags=["council"])
+
+
+def count_words(text: str) -> int:
+    """Count words in text."""
+    return len(text.split())
 
 
 @router.post("/query")
@@ -27,6 +37,41 @@ async def query_council(
 ):
     _ = rate_limit_ok
     _ = user_id
+
+    # Validate query length
+    word_count = count_words(request.query)
+    if word_count > MAX_QUERY_WORDS:
+
+        async def error_generator():
+            yield {
+                "event": "error",
+                "data": json.dumps(
+                    {
+                        "error": f"Your question is too long ({word_count} words). Please keep it under {MAX_QUERY_WORDS} words.",
+                        "code": "QUERY_TOO_LONG",
+                        "current_words": word_count,
+                        "max_words": MAX_QUERY_WORDS,
+                    }
+                ),
+            }
+
+        return EventSourceResponse(error_generator())
+
+    if not request.query.strip():
+
+        async def error_generator():
+            yield {
+                "event": "error",
+                "data": json.dumps(
+                    {
+                        "error": "Please enter a question first.",
+                        "code": "EMPTY_QUERY",
+                    }
+                ),
+            }
+
+        return EventSourceResponse(error_generator())
+
     council = CouncilService()
 
     async def event_generator():
@@ -50,15 +95,49 @@ async def query_council(
                     {"status": "complete", "queries_remaining": remaining}
                 ),
             }
-        except Exception as e:
-            print(f"Council error: {e}")
-            traceback.print_exc()
+        except ModelNotAvailableError as e:
+            # User-friendly error for model not available
+            logger.error(f"Model not available: {e.model_name}")
             yield {
                 "event": "error",
                 "data": json.dumps(
                     {
-                        "error": f"Council error: {str(e)[:200]}",
-                        "code": "COUNCIL_ERROR",
+                        "error": e.user_message,
+                        "code": "MODEL_NOT_AVAILABLE",
+                        "model": e.model_name,
+                    }
+                ),
+            }
+        except Exception as e:
+            print(f"Council error: {e}")
+            traceback.print_exc()
+            error_msg = str(e)
+            # Check for common errors and provide user-friendly messages
+            if "rate limit" in error_msg.lower():
+                user_message = (
+                    "You've reached the daily query limit. Please try again tomorrow."
+                )
+                code = "RATE_LIMIT_EXCEEDED"
+            elif "timeout" in error_msg.lower() or "time out" in error_msg.lower():
+                user_message = (
+                    "Request is taking too long. Please try a shorter question."
+                )
+                code = "TIMEOUT_ERROR"
+            elif "connection" in error_msg.lower():
+                user_message = (
+                    "Connection issue. Please check your internet and try again."
+                )
+                code = "CONNECTION_ERROR"
+            else:
+                user_message = "Something went wrong. Please try again."
+                code = "COUNCIL_ERROR"
+
+            yield {
+                "event": "error",
+                "data": json.dumps(
+                    {
+                        "error": user_message,
+                        "code": code,
                     }
                 ),
             }
