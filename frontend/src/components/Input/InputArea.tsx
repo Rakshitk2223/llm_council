@@ -7,7 +7,7 @@ import { useModeStore } from '../../stores/modeStore';
 import { useSessionStore } from '../../stores/sessionStore';
 
 // Maximum query length in words - can be adjusted as needed
-const MAX_QUERY_WORDS = 500;
+const MAX_QUERY_WORDS = 200;
 
 export function InputArea() {
   const [query, setQuery] = useState('');

@@ -62,7 +62,7 @@ AUTH_DISABLED=true
 JWT_SECRET=dev-secret
 
 # Rate limiting (high limit by default)
-RATE_LIMIT_PER_DAY=1000
+RATE_LIMIT_PER_DAY=20
 
 # CORS (allow all for development)
 FRONTEND_URL=*

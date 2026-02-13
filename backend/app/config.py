@@ -16,14 +16,14 @@ class Settings(BaseSettings):
     xai_api_key: str = ""
 
     # JWT Authentication (disabled by default)
-    jwt_secret: str = "dev-secret-not-for-production"
+    jwt_secret: str = "Thisisfordevonlyplschangeifneeded"
     jwt_algorithm: str = "HS256"
     auth_disabled: bool = True
 
     # Rate Limiting (disabled by default)
     rate_limit_per_day: int = 1000
 
-    # CORS (allow all for now)
+    # CORS 
     frontend_url: str = "*"
 
     class Config:
@@ -96,7 +96,7 @@ SENATOR_MODELS = [
 AVAILABLE_MODELS = COUNCIL_MODELS + SENATOR_MODELS
 
 # Default models for random assignment
-DEFAULT_COUNCIL_MODEL = "gpt-4o-mini"
+DEFAULT_COUNCIL_MODEL = "gpt-4o"
 DEFAULT_SENATOR_MODEL = "gpt-4o"
 
 # Safety switch: Force all models to use GPT-4o
@@ -105,7 +105,7 @@ DEFAULT_SENATOR_MODEL = "gpt-4o"
 USE_GPT4O_AS_DEFAULT = True
 
 # Maximum query length (in words)
-MAX_QUERY_WORDS = 500
+MAX_QUERY_WORDS = 200
 
 import random
 
