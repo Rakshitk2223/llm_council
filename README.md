@@ -174,16 +174,6 @@ llm_councilmen/
    npm run build
    ```
 
-4. **Static File Serving**:
-   - Serve built frontend files from backend or use a reverse proxy (nginx)
-
-### Security Considerations
-
-- Never commit `.env` files with real credentials
-- Use strong JWT secrets in production
-- Enable rate limiting if needed (`RATE_LIMIT_PER_DAY`)
-- Configure CORS properly for your domain
-
 ## Troubleshooting
 
 **Backend won't start**: Check that all required environment variables are set in `.env`
@@ -192,6 +182,3 @@ llm_councilmen/
 
 **CORS errors**: Update `FRONTEND_URL` in backend `.env` to match your frontend URL
 
-## License
-
-MIT License - See LICENSE file for details

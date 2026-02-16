@@ -106,6 +106,9 @@ USE_GPT4O_AS_DEFAULT = True
 
 # Maximum query length (in words)
 MAX_QUERY_WORDS = 200
+# Also update the same in Change in frontend\src\components\Input\InputArea.tsx -
+
+
 
 import random
 
