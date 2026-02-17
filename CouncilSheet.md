@@ -263,8 +263,6 @@ const widget = new AxisCouncilWidget({
 
 ---
 
-## Checklist
-
 - [ ] Set `USE_GPT4O_AS_DEFAULT=True` (safety mode)
 - [ ] Set `AUTH_DISABLED=False` (if using auth)
 - [ ] Configure production Azure credentials
@@ -272,8 +270,6 @@ const widget = new AxisCouncilWidget({
 - [ ] Test all error scenarios
 - [ ] Verify token limits
 
-
-### Common Questions
 
 **Q: How to customize theme?**
 A: Edit `frontend/src/styles/theme.css` - CSS variables control all colors
