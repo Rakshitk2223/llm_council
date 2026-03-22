@@ -6,22 +6,31 @@
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 venv/
 .venv/
 *.egg-info/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 
 # Frontend
 node_modules/
 dist/
-bun.lockb
+build/
 
 # IDE
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
 
 # Logs
 *.log
 logs/
+
+# Cache
+.cache/
