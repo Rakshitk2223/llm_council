@@ -16,7 +16,7 @@ interface LayoutStore {
   loadFromStorage: () => void;
 }
 
-const STORAGE_KEY = 'axis-council-layout';
+const STORAGE_KEY = 'llm-council-layout';
 
 export const useLayoutStore = create<LayoutStore>((set) => ({
   layoutMode: 'sequential',

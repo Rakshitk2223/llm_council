@@ -55,7 +55,7 @@ export function Layout() {
             ) : (
               <>
                 <h1 className="font-semibold text-lg text-primary">
-                  Axis Council
+                  LLM Council
                 </h1>
                 <div className="flex items-center gap-1">
                   <button

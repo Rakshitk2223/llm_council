@@ -28,7 +28,7 @@ interface SessionStore {
   saveToStorage: () => void;
 }
 
-const STORAGE_KEY = 'axis-council-sessions';
+const STORAGE_KEY = 'llm-council-sessions';
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
 

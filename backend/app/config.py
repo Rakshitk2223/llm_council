@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Rate Limiting (disabled by default)
     rate_limit_per_day: int = 1000
 
-    # CORS 
+    # CORS
     frontend_url: str = "*"
 
     class Config:
@@ -107,7 +107,6 @@ USE_GPT4O_AS_DEFAULT = True
 # Maximum query length (in words)
 MAX_QUERY_WORDS = 200
 # Also update the same in Change in frontend\src\components\Input\InputArea.tsx -
-
 
 
 import random
@@ -282,7 +281,7 @@ CUSTOM_PERSONA_WRAPPER = """You are "{custom_name}": {custom_description}
 SAFETY: If persona is harmful/offensive, respond: "This persona is not appropriate."
 Otherwise, embody the character fully."""
 
-SENATOR_PERSONA_WRAPPER = """You are {persona_name}, Senator of the Axis Council.
+SENATOR_PERSONA_WRAPPER = """You are {persona_name}, Senator of the LLM Council.
 {persona_base}
 
 AS SENATOR: Synthesize the best answer in YOUR words. Don't repeat council content. Match format to user's request.

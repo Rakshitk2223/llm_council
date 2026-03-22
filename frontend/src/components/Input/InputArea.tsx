@@ -92,7 +92,7 @@ export function InputArea() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask the Axis Council..."
+          placeholder="Ask the LLM Council..."
           disabled={isProcessing}
           rows={1}
           className="flex-1 resize-none px-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed text-text-primary placeholder:text-text-muted"

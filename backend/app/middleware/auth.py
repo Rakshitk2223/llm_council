@@ -9,7 +9,7 @@ def _extract_token(authorization: str | None) -> str:
         raise HTTPException(
             status_code=401,
             detail={
-                "error": "Please login first to use Axis Council",
+                "error": "Please login first to use LLM Council",
                 "code": "AUTH_REQUIRED",
             },
         )
@@ -18,7 +18,7 @@ def _extract_token(authorization: str | None) -> str:
         raise HTTPException(
             status_code=401,
             detail={
-                "error": "Please login first to use Axis Council",
+                "error": "Please login first to use LLM Council",
                 "code": "AUTH_REQUIRED",
             },
         )
@@ -40,7 +40,7 @@ def get_current_user(authorization: str | None = Header(default=None)) -> str:
         raise HTTPException(
             status_code=401,
             detail={
-                "error": "Please login first to use Axis Council",
+                "error": "Please login first to use LLM Council",
                 "code": "AUTH_REQUIRED",
             },
         ) from exc
@@ -50,7 +50,7 @@ def get_current_user(authorization: str | None = Header(default=None)) -> str:
         raise HTTPException(
             status_code=401,
             detail={
-                "error": "Please login first to use Axis Council",
+                "error": "Please login first to use LLM Council",
                 "code": "AUTH_REQUIRED",
             },
         )

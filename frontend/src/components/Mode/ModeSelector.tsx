@@ -66,7 +66,7 @@ export function ModeSelector() {
       <div className="bg-popup rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-2xl border border-border">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-text-primary mb-2">
-            Welcome to Axis Council
+            Welcome to LLM Council
           </h1>
           <p className="text-text-secondary">
             Choose how you want the council to deliberate

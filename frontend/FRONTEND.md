@@ -1,8 +1,8 @@
-# Axis Council - Frontend Documentation
+# LLM Council - Frontend Documentation
 
 ## Overview
 
-React + TypeScript + Vite frontend for the Axis Council LLM deliberation system. Features real-time streaming via Server-Sent Events (SSE), theme support, and session management.
+React + TypeScript + Vite frontend for the LLM Council deliberation system. Features real-time streaming via Server-Sent Events (SSE), theme support, and session management.
 
 ## Project Structure
 

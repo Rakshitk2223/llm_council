@@ -1,10 +1,10 @@
-# Axis Council
+# LLM Council
 
 An LLM Council deliberation system where multiple AI models collaboratively answer user queries through a transparent voting and verdict process.
 
 ## Overview
 
-Axis Council is an AI module designed for integration with web applications. It features:
+LLM Council is an AI module designed for integration with web applications. It features:
 
 - **Multiple Council Members**: 3 AI personas (Axis Alpha, Beta, Gamma) that independently answer queries
 - **Blind Voting**: Council members rate each other's responses without knowing which is theirs

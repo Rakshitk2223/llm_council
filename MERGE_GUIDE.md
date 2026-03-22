@@ -1,6 +1,6 @@
 # Frontend-Backend Merge Guide
 
-Reference document for integrating a new frontend with the existing Axis Council backend.
+Reference document for integrating a new frontend with the existing LLM Council backend.
 
 ---
 
@@ -81,7 +81,7 @@ The new frontend should enforce the same limit client-side. The backend also enf
 GET /api/health
 
 Response:
-{ "status": "healthy", "service": "axis-council" }
+{ "status": "healthy", "service": "llm-council" }
 ```
 
 ### 2.2 Get Available Models

@@ -139,7 +139,7 @@ export function ChatArea() {
 
         {!currentSession && (
           <div className="text-text-muted text-sm text-center py-10">
-            Start a new session to ask the Axis Council.
+            Start a new session to ask the LLM Council.
           </div>
         )}
       </div>
@@ -194,7 +194,7 @@ export function ChatArea() {
 
       {!currentSession && (
         <div className="text-text-muted text-sm text-center py-10">
-          Start a new session to ask the Axis Council.
+          Start a new session to ask the LLM Council.
         </div>
       )}
     </div>

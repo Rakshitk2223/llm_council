@@ -23,7 +23,7 @@ export const useModeStore = create<ModeStore>()(
       setShowModeSelector: (value) => set({ showModeSelector: value }),
     }),
     {
-      name: 'axis-council-mode',
+      name: 'llm-council-mode',
       partialize: (state) => ({
         mode: state.mode,
         hasSelectedMode: state.hasSelectedMode,

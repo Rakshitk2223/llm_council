@@ -1,8 +1,8 @@
-# Axis Council - Backend Documentation
+# LLM Council - Backend Documentation
 
 ## Overview
 
-FastAPI backend that orchestrates the Axis Council process: multiple LLM responses, blind voting, and final senator verdict with Server-Sent Events (SSE) streaming.
+FastAPI backend that orchestrates the LLM Council process: multiple LLM responses, blind voting, and final senator verdict with Server-Sent Events (SSE) streaming.
 
 ## Project Structure
 
@@ -298,10 +298,10 @@ server {
 
 ### Run with Systemd
 
-Create `/etc/systemd/system/axis-council.service`:
+Create `/etc/systemd/system/llm-council.service`:
 ```ini
 [Unit]
-Description=Axis Council Backend
+Description=LLM Council Backend
 After=network.target
 
 [Service]
@@ -317,8 +317,8 @@ WantedBy=multi-user.target
 
 Enable:
 ```bash
-sudo systemctl enable axis-council
-sudo systemctl start axis-council
+sudo systemctl enable llm-council
+sudo systemctl start llm-council
 ```
 
 ## Troubleshooting

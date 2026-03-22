@@ -5,7 +5,7 @@ from app.config import settings
 from app.routers import council
 
 app = FastAPI(
-    title="Axis Council API",
+    title="LLM Council API",
     description="LLM Council deliberation service",
     version="1.0.0",
 )
@@ -23,6 +23,4 @@ app.include_router(council.router)
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "service": "axis-council"}
-
-
+    return {"status": "healthy", "service": "llm-council"}

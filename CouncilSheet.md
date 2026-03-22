@@ -1,4 +1,4 @@
-# Axis Council - DETAILED DESCRIPTION
+# LLM Council - DETAILED DESCRIPTION
 
 > **WARNING:** This file contains sensitive configuration details and internal architecture. 
 
@@ -243,7 +243,7 @@ function closeCouncil() {
 
 **More complex but better integration:**
 ```javascript
-import { AxisCouncilWidget } from './axis-council-widget.js';
+import { LLMCouncilWidget } from './llm-council-widget.js';
 
 const widget = new AxisCouncilWidget({
   apiUrl: 'https://council-api.yourdomain.com',

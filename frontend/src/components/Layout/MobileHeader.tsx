@@ -29,7 +29,7 @@ export function MobileHeader() {
       </button>
       
       <h1 className="font-semibold text-lg bg-gradient-to-r from-alpha via-beta to-gamma bg-clip-text text-transparent">
-        Axis Council
+        LLM Council
       </h1>
       
       <ThemeToggle />

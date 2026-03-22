@@ -126,7 +126,7 @@ export const useSettingsStore = create<SettingsStore>()(
       },
     }),
     {
-      name: 'axis-council-settings',
+      name: 'llm-council-settings',
       partialize: (state) => ({
         councilMembers: state.councilMembers,
         senatorPersona: state.senatorPersona,
