@@ -62,6 +62,24 @@ function groupMessagesIntoRounds(messages: Message[]): ConversationRound[] {
   return rounds;
 }
 
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-20">
+      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold text-text-primary mb-2">LLM Council</h3>
+      <p className="text-text-secondary text-center max-w-md">
+        Ask any question and watch multiple AI models collaborate to deliver the best answer.
+      </p>
+    </div>
+  );
+}
+
 export function ChatArea() {
   const { sessions, currentSessionId, councilState } = useSessionStore();
   const { layoutMode } = useLayoutStore();
@@ -90,81 +108,32 @@ export function ChatArea() {
     }
   }, [messages, councilState.votingResults]);
 
-  if (layoutMode === 'cards') {
+  if (!currentSession || messages.length === 0) {
     return (
-      <div 
-        className="h-full overflow-y-auto px-3 py-4 md:px-6 md:py-6" 
-        ref={containerRef}
-        onScroll={handleScroll}
-      >
-        {councilState.error && (
-          <div className="mb-4">
-            <ErrorMessage message={councilState.error} />
-          </div>
-        )}
-
-        {rounds.map((round, roundIndex) => {
-          const isLastRound = roundIndex === rounds.length - 1;
-          const hasSenator = !!round.senatorMessage;
-          const filteredSystemMessages = filterSystemMessages(round.systemMessages, hasSenator);
-          
-          return (
-            <div key={round.userMessage.id} className="mb-6">
-              <MessageBubble message={round.userMessage} />
-              
-              {round.councilMessages.length > 0 && (
-                <CardsView messages={round.councilMessages} />
-              )}
-              
-              {filteredSystemMessages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
-              ))}
-              
-              {isLastRound && hasVotingResults && (
-                <VotingDisplay
-                  results={councilState.votingResults!}
-                  mapping={councilState.responseMapping!}
-                  votes={councilState.votingVotes}
-                />
-              )}
-              
-              {round.senatorMessage && (
-                <div className="mt-6">
-                  <MessageBubble message={round.senatorMessage} />
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {!currentSession && (
-          <div className="text-text-muted text-sm text-center py-10">
-            Start a new session to ask the LLM Council.
-          </div>
-        )}
+      <div className="h-full overflow-y-auto px-4 md:px-8">
+        <EmptyState />
       </div>
     );
   }
 
   return (
     <div 
-      className="h-full overflow-y-auto px-3 py-4 md:px-6 md:py-6" 
+      className="h-full overflow-y-auto px-4 py-6 md:px-8" 
       ref={containerRef}
       onScroll={handleScroll}
     >
       {councilState.error && (
-        <div className="mb-4">
+        <div className="mb-6">
           <ErrorMessage message={councilState.error} />
         </div>
       )}
 
-      {rounds.map((round, roundIndex) => {
-        const isLastRound = roundIndex === rounds.length - 1;
+      {rounds.map((round) => {
         const hasSenator = !!round.senatorMessage;
         const filteredSystemMessages = filterSystemMessages(round.systemMessages, hasSenator);
         
         return (
-          <div key={round.userMessage.id} className="mb-6">
+          <div key={round.userMessage.id}>
             <MessageBubble message={round.userMessage} />
             
             {round.councilMessages.map((message) => (
@@ -175,7 +144,7 @@ export function ChatArea() {
               <MessageBubble key={message.id} message={message} />
             ))}
             
-            {isLastRound && hasVotingResults && (
+            {hasVotingResults && layoutMode === 'cards' && (
               <VotingDisplay
                 results={councilState.votingResults!}
                 mapping={councilState.responseMapping!}
@@ -191,12 +160,6 @@ export function ChatArea() {
           </div>
         );
       })}
-
-      {!currentSession && (
-        <div className="text-text-muted text-sm text-center py-10">
-          Start a new session to ask the LLM Council.
-        </div>
-      )}
     </div>
   );
 }

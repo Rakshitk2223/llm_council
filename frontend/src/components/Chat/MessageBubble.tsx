@@ -17,11 +17,13 @@ function CopyButton({ content }: { content: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-surface-elevated text-text-muted hover:text-text-primary"
-      title={copied ? 'Copied!' : 'Copy to clipboard'}
+      className="opacity-0 group-hover:opacity-100 p-2 rounded-lg 
+                 text-text-muted hover:text-text-primary hover:bg-surface
+                 transition-all duration-fast"
+      title={copied ? 'Copied!' : 'Copy'}
     >
       {copied ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-status-success">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       ) : (
@@ -45,9 +47,13 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
   if (isUser) {
     return (
-      <div className="flex justify-end mb-4">
-        <div className="max-w-[70%] bg-text-primary text-text-inverse px-4 py-3 rounded-xl rounded-br-sm shadow-md">
-          <p className="whitespace-pre-wrap">{message.content}</p>
+      <div className="flex justify-end mb-5 animate-slide-up">
+        <div className="max-w-[75%] flex items-start gap-3">
+          <div className="px-5 py-3.5 rounded-2xl rounded-br-md
+                          bg-gradient-to-r from-primary to-primary-dark
+                          text-white shadow-lg">
+            <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+          </div>
         </div>
       </div>
     );
@@ -58,54 +64,80 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     const isComplete = message.content.toLowerCase().includes('available') || message.content.toLowerCase().includes('complete');
     
     return (
-      <div className="flex justify-center mb-4">
-        <div className="glass px-4 py-2 rounded-full text-text-muted text-sm flex items-center gap-2">
+      <div className="flex justify-center mb-5 animate-fade-in">
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-full
+                        bg-surface border border-surface-border">
           {isEvaluating && (
-            <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+              <span className="text-text-secondary">Processing</span>
+            </div>
           )}
           {isComplete && (
-            <svg className="w-3 h-3 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-status-success/20 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-status-success">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <span className="text-text-secondary">{message.content}</span>
+            </div>
           )}
-          {message.content}
+          {!isEvaluating && !isComplete && (
+            <span className="text-text-secondary">{message.content}</span>
+          )}
         </div>
       </div>
     );
   }
 
+  const getGlowClass = () => {
+    if (isSenator) return 'shadow-glow-senator';
+    const memberNum = message.memberId?.match(/\d+/)?.[0];
+    if (memberNum === '1') return 'shadow-glow-alpha';
+    if (memberNum === '2') return 'shadow-glow-beta';
+    if (memberNum === '3') return 'shadow-glow-gamma';
+    return '';
+  };
+
   return (
-    <div className={`group mb-4`}>
+    <div className={`group mb-5 animate-slide-up ${getGlowClass()}`}>
       <div 
-        className={`glass-elevated border-l-4 border-border px-4 py-4 rounded-xl rounded-l-sm transition-colors ${
-          isSenator ? 'ring-1 ring-border' : 'hover:bg-surface-elevated/80'
-        }`}
+        className={`p-5 rounded-2xl rounded-l-md
+                   bg-bg-elevated border border-surface-border
+                   hover:border-surface-border-hover
+                   transition-all duration-base ${isSenator ? 'border-l-2 border-l-accent' : ''}`}
       >
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <RobotAvatar memberId={message.memberId || 'alpha'} size={isSenator ? 'lg' : 'md'} />
           <div className="flex items-center gap-2 flex-1">
-            <span className={`font-semibold ${isSenator ? 'text-base' : 'text-sm'}`}>
+            <span className={`font-semibold ${isSenator ? 'text-base text-accent' : 'text-sm'}`}>
               {message.memberName}
             </span>
             {isSenator && (
-              <span className="text-xs px-3 py-1 rounded-full border border-border bg-surface-elevated text-text-muted">
+              <span className="badge-primary">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent mr-1.5 animate-pulse" />
                 Final Verdict
               </span>
             )}
             {message.isThinking && <ThinkingIndicator />}
             {message.isStreaming && (
-              <span className="text-xs text-text-muted animate-pulse">streaming...</span>
+              <span className="text-xs text-text-muted flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                streaming
+              </span>
             )}
           </div>
           {message.content && !message.isThinking && (
             <CopyButton content={message.content} />
           )}
         </div>
+        
         {!message.isThinking && message.content && (
-          <div className="prose prose-sm max-w-none dark:prose-invert text-text-primary">
+          <div className="prose prose-sm max-w-none 
+                          prose-headings:text-text-primary prose-p:text-text-secondary
+                          prose-strong:text-text-primary prose-li:text-text-secondary
+                          prose-a:text-primary prose-code:text-accent">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         )}
