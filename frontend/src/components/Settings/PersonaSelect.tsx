@@ -76,7 +76,7 @@ export function PersonaSelect({
   const dropdown = isOpen ? createPortal(
     <div 
       ref={dropdownRef}
-      className="fixed bg-surface-elevated border border-border rounded-lg shadow-xl max-h-72 overflow-y-auto"
+      className="fixed bg-bg-elevated border border-surface-border rounded-xl shadow-xl max-h-72 overflow-y-auto"
       style={{ 
         top: dropdownPosition.top,
         left: dropdownPosition.left,
@@ -87,9 +87,9 @@ export function PersonaSelect({
       {personas.map((persona) => (
         <div
           key={persona.id}
-          className={`px-3 py-2 cursor-pointer transition-colors ${
+          className={`px-3 py-2.5 cursor-pointer transition-all ${
             value === persona.id 
-              ? 'bg-primary/10 text-primary' 
+              ? 'bg-primary/20 text-primary' 
               : 'hover:bg-surface text-text-primary'
           }`}
           onClick={() => handleSelect(persona.id)}
@@ -106,7 +106,7 @@ export function PersonaSelect({
           </div>
           
           {hoveredId === persona.id && persona.description && (
-            <div className="mt-1 px-2 py-1.5 bg-gray-900 text-white text-xs rounded">
+            <div className="mt-1 px-2 py-1.5 bg-bg-primary text-text-secondary text-xs rounded-lg border border-surface-border">
               {persona.description}
             </div>
           )}
@@ -115,9 +115,9 @@ export function PersonaSelect({
       
       {customPersona && (
         <div
-          className={`px-3 py-2 cursor-pointer border-t border-border transition-colors ${
+          className={`px-3 py-2.5 cursor-pointer border-t border-surface-border transition-all ${
             value === 'custom' 
-              ? 'bg-primary/10 text-primary' 
+              ? 'bg-primary/20 text-primary' 
               : 'hover:bg-surface text-text-primary'
           }`}
           onClick={() => handleSelect('custom')}
@@ -132,7 +132,7 @@ export function PersonaSelect({
           </div>
           
           {hoveredId === 'custom' && (
-            <div className="mt-1 px-2 py-1.5 bg-gray-900 text-white text-xs rounded">
+            <div className="mt-1 px-2 py-1.5 bg-bg-primary text-text-secondary text-xs rounded-lg border border-surface-border">
               Your custom persona
             </div>
           )}
@@ -151,7 +151,7 @@ export function PersonaSelect({
           updatePosition();
           setIsOpen(!isOpen);
         }}
-        className="w-full p-2 border border-border rounded bg-surface text-text-primary text-sm text-left flex items-center justify-between hover:border-primary/50 transition-colors"
+        className="w-full p-2.5 border border-surface-border rounded-lg bg-bg-secondary text-text-primary text-sm text-left flex items-center justify-between hover:border-primary/50 transition-all"
       >
         <span className="truncate">{selectedPersona?.name || 'Select persona'}</span>
         <svg 

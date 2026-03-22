@@ -1,12 +1,15 @@
 import { useModeStore } from '../../stores/modeStore';
 import type { CouncilMode } from '../../types';
 
+const ENABLE_VOTE_MODE = true;
+const ENABLE_DEEP_MODE = true;
+
 interface ModeOption {
   mode: CouncilMode;
   title: string;
   description: string;
   details: string[];
-  icon: 'zap' | 'scale' | 'brain';
+  icon: 'zap' | 'vote' | 'brain';
   gradient: string;
 }
 
@@ -26,7 +29,7 @@ const modeOptions: ModeOption[] = [
   },
   {
     mode: 'comprehensive',
-    title: 'Full Mode',
+    title: 'Vote Mode',
     description: 'Full deliberation with peer evaluation',
     details: [
       'Council members respond',
@@ -34,7 +37,7 @@ const modeOptions: ModeOption[] = [
       'Senator synthesizes with vote data',
       'Best for complex topics',
     ],
-    icon: 'scale',
+    icon: 'vote',
     gradient: 'from-blue-500 to-indigo-500',
   },
   {
@@ -52,8 +55,18 @@ const modeOptions: ModeOption[] = [
   },
 ];
 
+const getAvailableModes = () => {
+  return modeOptions.filter(mode => {
+    if (mode.mode === 'fast') return true;
+    if (mode.mode === 'comprehensive') return ENABLE_VOTE_MODE;
+    if (mode.mode === 'deep') return ENABLE_DEEP_MODE;
+    return true;
+  });
+};
+
 export function ModeSelector() {
   const { setMode, setHasSelectedMode, setShowModeSelector } = useModeStore();
+  const availableModes = getAvailableModes();
 
   const handleSelectMode = (mode: CouncilMode) => {
     setMode(mode);
@@ -82,8 +95,8 @@ export function ModeSelector() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
-          {modeOptions.map((option) => (
+        <div className={`grid gap-5 ${availableModes.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'}`}>
+          {availableModes.map((option) => (
             <button
               key={option.mode}
               onClick={() => handleSelectMode(option.mode)}
@@ -102,9 +115,9 @@ export function ModeSelector() {
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                  ) : option.icon === 'scale' ? (
+                  ) : option.icon === 'vote' ? (
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ) : (
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

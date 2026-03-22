@@ -103,6 +103,10 @@ DEFAULT_SENATOR_MODEL = "gpt-4o"
 # When False: Uses actual selected models with provider validation
 USE_GPT4O_AS_DEFAULT = True
 
+# Feature Flags - Enable/Disable modes
+ENABLE_VOTE_MODE = True  # Enable Vote Mode (comprehensive deliberation with voting)
+ENABLE_DEEP_MODE = True  # Enable Deep Mode (NxN voting matrix)
+
 # Maximum query length (in words)
 MAX_QUERY_WORDS = 200
 # Also update the same in Change in frontend\src\components\Input\InputArea.tsx -
