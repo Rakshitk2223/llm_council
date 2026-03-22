@@ -26,8 +26,7 @@ class Settings(BaseSettings):
     # CORS
     frontend_url: str = "*"
 
-    class Config:
-        env_file = ".env"
+    model_config = {"env_file": ".env", "extra": "ignore"}
 
 
 settings = Settings()
